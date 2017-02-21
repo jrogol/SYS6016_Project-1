@@ -19,3 +19,5 @@ shootings <- shootings %>%
                month = month(date, label =T),
                year = year(date))
 
+shootings %>% unique(city, state)
+
