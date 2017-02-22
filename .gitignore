@@ -1,5 +1,11 @@
 .Rproj.user
 .Rhistory
 .Ruserdata
+.RData
 
 *.docx
+
+
+CDC Data/CDC_parser.py
+
+CDC Data/VS15MORT.DUSMCPUB
