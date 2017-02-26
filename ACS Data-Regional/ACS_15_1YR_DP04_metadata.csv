@@ -1,25 +1,26 @@
+Tag,Name,Keep
 GEO.id,Id,
 GEO.id2,Id2,
-GEO.display-label,Geography,
+GEO.display-label,Geography,x
 HC01_VC03,Estimate; HOUSING OCCUPANCY - Total housing units,x
 HC02_VC03,Margin of Error; HOUSING OCCUPANCY - Total housing units,
 HC03_VC03,Percent; HOUSING OCCUPANCY - Total housing units,
 HC04_VC03,Percent Margin of Error; HOUSING OCCUPANCY - Total housing units,
 HC01_VC04,Estimate; HOUSING OCCUPANCY - Total housing units - Occupied housing units,
 HC02_VC04,Margin of Error; HOUSING OCCUPANCY - Total housing units - Occupied housing units,
-HC03_VC04,Percent; HOUSING OCCUPANCY - Total housing units - Occupied housing units,
+HC03_VC04,Percent; HOUSING OCCUPANCY - Total housing units - Occupied housing units,x
 HC04_VC04,Percent Margin of Error; HOUSING OCCUPANCY - Total housing units - Occupied housing units,
-HC01_VC05,Estimate; HOUSING OCCUPANCY - Total housing units - Vacant housing units,x
+HC01_VC05,Estimate; HOUSING OCCUPANCY - Total housing units - Vacant housing units,
 HC02_VC05,Margin of Error; HOUSING OCCUPANCY - Total housing units - Vacant housing units,
-HC03_VC05,Percent; HOUSING OCCUPANCY - Total housing units - Vacant housing units,
+HC03_VC05,Percent; HOUSING OCCUPANCY - Total housing units - Vacant housing units,x
 HC04_VC05,Percent Margin of Error; HOUSING OCCUPANCY - Total housing units - Vacant housing units,
-HC01_VC08,Estimate; HOUSING OCCUPANCY - Homeowner vacancy rate,x
+HC01_VC08,Estimate; HOUSING OCCUPANCY - Homeowner vacancy rate,
 HC02_VC08,Margin of Error; HOUSING OCCUPANCY - Homeowner vacancy rate,
-HC03_VC08,Percent; HOUSING OCCUPANCY - Homeowner vacancy rate,
+HC03_VC08,Percent; HOUSING OCCUPANCY - Homeowner vacancy rate,x
 HC04_VC08,Percent Margin of Error; HOUSING OCCUPANCY - Homeowner vacancy rate,
 HC01_VC09,Estimate; HOUSING OCCUPANCY - Rental vacancy rate,
 HC02_VC09,Margin of Error; HOUSING OCCUPANCY - Rental vacancy rate,
-HC03_VC09,Percent; HOUSING OCCUPANCY - Rental vacancy rate,
+HC03_VC09,Percent; HOUSING OCCUPANCY - Rental vacancy rate,x
 HC04_VC09,Percent Margin of Error; HOUSING OCCUPANCY - Rental vacancy rate,
 HC01_VC13,Estimate; UNITS IN STRUCTURE - Total housing units,
 HC02_VC13,Margin of Error; UNITS IN STRUCTURE - Total housing units,
@@ -67,43 +68,43 @@ HC03_VC26,Percent; YEAR STRUCTURE BUILT - Total housing units,
 HC04_VC26,Percent Margin of Error; YEAR STRUCTURE BUILT - Total housing units,
 HC01_VC27,Estimate; YEAR STRUCTURE BUILT - Total housing units - Built 2014 or later,
 HC02_VC27,Margin of Error; YEAR STRUCTURE BUILT - Total housing units - Built 2014 or later,
-HC03_VC27,Percent; YEAR STRUCTURE BUILT - Total housing units - Built 2014 or later,
+HC03_VC27,Percent; YEAR STRUCTURE BUILT - Total housing units - Built 2014 or later,x
 HC04_VC27,Percent Margin of Error; YEAR STRUCTURE BUILT - Total housing units - Built 2014 or later,
 HC01_VC28,Estimate; YEAR STRUCTURE BUILT - Total housing units - Built 2010 to 2013,
 HC02_VC28,Margin of Error; YEAR STRUCTURE BUILT - Total housing units - Built 2010 to 2013,
-HC03_VC28,Percent; YEAR STRUCTURE BUILT - Total housing units - Built 2010 to 2013,
+HC03_VC28,Percent; YEAR STRUCTURE BUILT - Total housing units - Built 2010 to 2013,x
 HC04_VC28,Percent Margin of Error; YEAR STRUCTURE BUILT - Total housing units - Built 2010 to 2013,
 HC01_VC29,Estimate; YEAR STRUCTURE BUILT - Total housing units - Built 2000 to 2009,
 HC02_VC29,Margin of Error; YEAR STRUCTURE BUILT - Total housing units - Built 2000 to 2009,
-HC03_VC29,Percent; YEAR STRUCTURE BUILT - Total housing units - Built 2000 to 2009,
+HC03_VC29,Percent; YEAR STRUCTURE BUILT - Total housing units - Built 2000 to 2009,x
 HC04_VC29,Percent Margin of Error; YEAR STRUCTURE BUILT - Total housing units - Built 2000 to 2009,
 HC01_VC30,Estimate; YEAR STRUCTURE BUILT - Total housing units - Built 1990 to 1999,
 HC02_VC30,Margin of Error; YEAR STRUCTURE BUILT - Total housing units - Built 1990 to 1999,
-HC03_VC30,Percent; YEAR STRUCTURE BUILT - Total housing units - Built 1990 to 1999,
+HC03_VC30,Percent; YEAR STRUCTURE BUILT - Total housing units - Built 1990 to 1999,x
 HC04_VC30,Percent Margin of Error; YEAR STRUCTURE BUILT - Total housing units - Built 1990 to 1999,
 HC01_VC31,Estimate; YEAR STRUCTURE BUILT - Total housing units - Built 1980 to 1989,
 HC02_VC31,Margin of Error; YEAR STRUCTURE BUILT - Total housing units - Built 1980 to 1989,
-HC03_VC31,Percent; YEAR STRUCTURE BUILT - Total housing units - Built 1980 to 1989,
+HC03_VC31,Percent; YEAR STRUCTURE BUILT - Total housing units - Built 1980 to 1989,x
 HC04_VC31,Percent Margin of Error; YEAR STRUCTURE BUILT - Total housing units - Built 1980 to 1989,
 HC01_VC32,Estimate; YEAR STRUCTURE BUILT - Total housing units - Built 1970 to 1979,
 HC02_VC32,Margin of Error; YEAR STRUCTURE BUILT - Total housing units - Built 1970 to 1979,
-HC03_VC32,Percent; YEAR STRUCTURE BUILT - Total housing units - Built 1970 to 1979,
+HC03_VC32,Percent; YEAR STRUCTURE BUILT - Total housing units - Built 1970 to 1979,x
 HC04_VC32,Percent Margin of Error; YEAR STRUCTURE BUILT - Total housing units - Built 1970 to 1979,
 HC01_VC33,Estimate; YEAR STRUCTURE BUILT - Total housing units - Built 1960 to 1969,
 HC02_VC33,Margin of Error; YEAR STRUCTURE BUILT - Total housing units - Built 1960 to 1969,
-HC03_VC33,Percent; YEAR STRUCTURE BUILT - Total housing units - Built 1960 to 1969,
+HC03_VC33,Percent; YEAR STRUCTURE BUILT - Total housing units - Built 1960 to 1969,x
 HC04_VC33,Percent Margin of Error; YEAR STRUCTURE BUILT - Total housing units - Built 1960 to 1969,
 HC01_VC34,Estimate; YEAR STRUCTURE BUILT - Total housing units - Built 1950 to 1959,
 HC02_VC34,Margin of Error; YEAR STRUCTURE BUILT - Total housing units - Built 1950 to 1959,
-HC03_VC34,Percent; YEAR STRUCTURE BUILT - Total housing units - Built 1950 to 1959,
+HC03_VC34,Percent; YEAR STRUCTURE BUILT - Total housing units - Built 1950 to 1959,x
 HC04_VC34,Percent Margin of Error; YEAR STRUCTURE BUILT - Total housing units - Built 1950 to 1959,
 HC01_VC35,Estimate; YEAR STRUCTURE BUILT - Total housing units - Built 1940 to 1949,
 HC02_VC35,Margin of Error; YEAR STRUCTURE BUILT - Total housing units - Built 1940 to 1949,
-HC03_VC35,Percent; YEAR STRUCTURE BUILT - Total housing units - Built 1940 to 1949,
+HC03_VC35,Percent; YEAR STRUCTURE BUILT - Total housing units - Built 1940 to 1949,x
 HC04_VC35,Percent Margin of Error; YEAR STRUCTURE BUILT - Total housing units - Built 1940 to 1949,
 HC01_VC36,Estimate; YEAR STRUCTURE BUILT - Total housing units - Built 1939 or earlier,
 HC02_VC36,Margin of Error; YEAR STRUCTURE BUILT - Total housing units - Built 1939 or earlier,
-HC03_VC36,Percent; YEAR STRUCTURE BUILT - Total housing units - Built 1939 or earlier,
+HC03_VC36,Percent; YEAR STRUCTURE BUILT - Total housing units - Built 1939 or earlier,x
 HC04_VC36,Percent Margin of Error; YEAR STRUCTURE BUILT - Total housing units - Built 1939 or earlier,
 HC01_VC40,Estimate; ROOMS - Total housing units,
 HC02_VC40,Margin of Error; ROOMS - Total housing units,
@@ -177,7 +178,7 @@ HC01_VC60,Estimate; BEDROOMS - Total housing units - 5 or more bedrooms,
 HC02_VC60,Margin of Error; BEDROOMS - Total housing units - 5 or more bedrooms,
 HC03_VC60,Percent; BEDROOMS - Total housing units - 5 or more bedrooms,
 HC04_VC60,Percent Margin of Error; BEDROOMS - Total housing units - 5 or more bedrooms,
-HC01_VC64,Estimate; HOUSING TENURE - Occupied housing units,x
+HC01_VC64,Estimate; HOUSING TENURE - Occupied housing units,
 HC02_VC64,Margin of Error; HOUSING TENURE - Occupied housing units,
 HC03_VC64,Percent; HOUSING TENURE - Occupied housing units,
 HC04_VC64,Percent Margin of Error; HOUSING TENURE - Occupied housing units,
@@ -203,27 +204,27 @@ HC03_VC74,Percent; YEAR HOUSEHOLDER MOVED INTO UNIT - Occupied housing units,
 HC04_VC74,Percent Margin of Error; YEAR HOUSEHOLDER MOVED INTO UNIT - Occupied housing units,
 HC01_VC75,Estimate; YEAR HOUSEHOLDER MOVED INTO UNIT - Occupied housing units - Moved in 2015 or later,
 HC02_VC75,Margin of Error; YEAR HOUSEHOLDER MOVED INTO UNIT - Occupied housing units - Moved in 2015 or later,
-HC03_VC75,Percent; YEAR HOUSEHOLDER MOVED INTO UNIT - Occupied housing units - Moved in 2015 or later,
+HC03_VC75,Percent; YEAR HOUSEHOLDER MOVED INTO UNIT - Occupied housing units - Moved in 2015 or later,x
 HC04_VC75,Percent Margin of Error; YEAR HOUSEHOLDER MOVED INTO UNIT - Occupied housing units - Moved in 2015 or later,
 HC01_VC76,Estimate; YEAR HOUSEHOLDER MOVED INTO UNIT - Occupied housing units - Moved in 2010 to 2014,
 HC02_VC76,Margin of Error; YEAR HOUSEHOLDER MOVED INTO UNIT - Occupied housing units - Moved in 2010 to 2014,
-HC03_VC76,Percent; YEAR HOUSEHOLDER MOVED INTO UNIT - Occupied housing units - Moved in 2010 to 2014,
+HC03_VC76,Percent; YEAR HOUSEHOLDER MOVED INTO UNIT - Occupied housing units - Moved in 2010 to 2014,x
 HC04_VC76,Percent Margin of Error; YEAR HOUSEHOLDER MOVED INTO UNIT - Occupied housing units - Moved in 2010 to 2014,
 HC01_VC77,Estimate; YEAR HOUSEHOLDER MOVED INTO UNIT - Occupied housing units - Moved in 2000 to 2009,
 HC02_VC77,Margin of Error; YEAR HOUSEHOLDER MOVED INTO UNIT - Occupied housing units - Moved in 2000 to 2009,
-HC03_VC77,Percent; YEAR HOUSEHOLDER MOVED INTO UNIT - Occupied housing units - Moved in 2000 to 2009,
+HC03_VC77,Percent; YEAR HOUSEHOLDER MOVED INTO UNIT - Occupied housing units - Moved in 2000 to 2009,x
 HC04_VC77,Percent Margin of Error; YEAR HOUSEHOLDER MOVED INTO UNIT - Occupied housing units - Moved in 2000 to 2009,
 HC01_VC78,Estimate; YEAR HOUSEHOLDER MOVED INTO UNIT - Occupied housing units - Moved in 1990 to 1999,
 HC02_VC78,Margin of Error; YEAR HOUSEHOLDER MOVED INTO UNIT - Occupied housing units - Moved in 1990 to 1999,
-HC03_VC78,Percent; YEAR HOUSEHOLDER MOVED INTO UNIT - Occupied housing units - Moved in 1990 to 1999,
+HC03_VC78,Percent; YEAR HOUSEHOLDER MOVED INTO UNIT - Occupied housing units - Moved in 1990 to 1999,x
 HC04_VC78,Percent Margin of Error; YEAR HOUSEHOLDER MOVED INTO UNIT - Occupied housing units - Moved in 1990 to 1999,
 HC01_VC79,Estimate; YEAR HOUSEHOLDER MOVED INTO UNIT - Occupied housing units - Moved in 1980 to 1989,
 HC02_VC79,Margin of Error; YEAR HOUSEHOLDER MOVED INTO UNIT - Occupied housing units - Moved in 1980 to 1989,
-HC03_VC79,Percent; YEAR HOUSEHOLDER MOVED INTO UNIT - Occupied housing units - Moved in 1980 to 1989,
+HC03_VC79,Percent; YEAR HOUSEHOLDER MOVED INTO UNIT - Occupied housing units - Moved in 1980 to 1989,x
 HC04_VC79,Percent Margin of Error; YEAR HOUSEHOLDER MOVED INTO UNIT - Occupied housing units - Moved in 1980 to 1989,
 HC01_VC80,Estimate; YEAR HOUSEHOLDER MOVED INTO UNIT - Occupied housing units - Moved in 1979 and earlier,
 HC02_VC80,Margin of Error; YEAR HOUSEHOLDER MOVED INTO UNIT - Occupied housing units - Moved in 1979 and earlier,
-HC03_VC80,Percent; YEAR HOUSEHOLDER MOVED INTO UNIT - Occupied housing units - Moved in 1979 and earlier,
+HC03_VC80,Percent; YEAR HOUSEHOLDER MOVED INTO UNIT - Occupied housing units - Moved in 1979 and earlier,x
 HC04_VC80,Percent Margin of Error; YEAR HOUSEHOLDER MOVED INTO UNIT - Occupied housing units - Moved in 1979 and earlier,
 HC01_VC84,Estimate; VEHICLES AVAILABLE - Occupied housing units,
 HC02_VC84,Margin of Error; VEHICLES AVAILABLE - Occupied housing units,
@@ -289,17 +290,17 @@ HC01_VC105,Estimate; SELECTED CHARACTERISTICS - Occupied housing units,
 HC02_VC105,Margin of Error; SELECTED CHARACTERISTICS - Occupied housing units,
 HC03_VC105,Percent; SELECTED CHARACTERISTICS - Occupied housing units,
 HC04_VC105,Percent Margin of Error; SELECTED CHARACTERISTICS - Occupied housing units,
-HC01_VC106,Estimate; SELECTED CHARACTERISTICS - Occupied housing units - Lacking complete plumbing facilities,x
+HC01_VC106,Estimate; SELECTED CHARACTERISTICS - Occupied housing units - Lacking complete plumbing facilities,
 HC02_VC106,Margin of Error; SELECTED CHARACTERISTICS - Occupied housing units - Lacking complete plumbing facilities,
-HC03_VC106,Percent; SELECTED CHARACTERISTICS - Occupied housing units - Lacking complete plumbing facilities,
+HC03_VC106,Percent; SELECTED CHARACTERISTICS - Occupied housing units - Lacking complete plumbing facilities,x
 HC04_VC106,Percent Margin of Error; SELECTED CHARACTERISTICS - Occupied housing units - Lacking complete plumbing facilities,
-HC01_VC107,Estimate; SELECTED CHARACTERISTICS - Occupied housing units - Lacking complete kitchen facilities,x
+HC01_VC107,Estimate; SELECTED CHARACTERISTICS - Occupied housing units - Lacking complete kitchen facilities,
 HC02_VC107,Margin of Error; SELECTED CHARACTERISTICS - Occupied housing units - Lacking complete kitchen facilities,
-HC03_VC107,Percent; SELECTED CHARACTERISTICS - Occupied housing units - Lacking complete kitchen facilities,
+HC03_VC107,Percent; SELECTED CHARACTERISTICS - Occupied housing units - Lacking complete kitchen facilities,x
 HC04_VC107,Percent Margin of Error; SELECTED CHARACTERISTICS - Occupied housing units - Lacking complete kitchen facilities,
-HC01_VC108,Estimate; SELECTED CHARACTERISTICS - Occupied housing units - No telephone service available,x
+HC01_VC108,Estimate; SELECTED CHARACTERISTICS - Occupied housing units - No telephone service available,
 HC02_VC108,Margin of Error; SELECTED CHARACTERISTICS - Occupied housing units - No telephone service available,
-HC03_VC108,Percent; SELECTED CHARACTERISTICS - Occupied housing units - No telephone service available,
+HC03_VC108,Percent; SELECTED CHARACTERISTICS - Occupied housing units - No telephone service available,x
 HC04_VC108,Percent Margin of Error; SELECTED CHARACTERISTICS - Occupied housing units - No telephone service available,
 HC01_VC112,Estimate; OCCUPANTS PER ROOM - Occupied housing units,x
 HC02_VC112,Margin of Error; OCCUPANTS PER ROOM - Occupied housing units,
@@ -323,47 +324,47 @@ HC03_VC119,Percent; VALUE - Owner-occupied units,
 HC04_VC119,Percent Margin of Error; VALUE - Owner-occupied units,
 HC01_VC120,"Estimate; VALUE - Owner-occupied units - Less than $50,000",
 HC02_VC120,"Margin of Error; VALUE - Owner-occupied units - Less than $50,000",
-HC03_VC120,"Percent; VALUE - Owner-occupied units - Less than $50,000",
+HC03_VC120,"Percent; VALUE - Owner-occupied units - Less than $50,000",x
 HC04_VC120,"Percent Margin of Error; VALUE - Owner-occupied units - Less than $50,000",
 HC01_VC121,"Estimate; VALUE - Owner-occupied units - $50,000 to $99,999",
 HC02_VC121,"Margin of Error; VALUE - Owner-occupied units - $50,000 to $99,999",
-HC03_VC121,"Percent; VALUE - Owner-occupied units - $50,000 to $99,999",
+HC03_VC121,"Percent; VALUE - Owner-occupied units - $50,000 to $99,999",x
 HC04_VC121,"Percent Margin of Error; VALUE - Owner-occupied units - $50,000 to $99,999",
 HC01_VC122,"Estimate; VALUE - Owner-occupied units - $100,000 to $149,999",
 HC02_VC122,"Margin of Error; VALUE - Owner-occupied units - $100,000 to $149,999",
-HC03_VC122,"Percent; VALUE - Owner-occupied units - $100,000 to $149,999",
+HC03_VC122,"Percent; VALUE - Owner-occupied units - $100,000 to $149,999",x
 HC04_VC122,"Percent Margin of Error; VALUE - Owner-occupied units - $100,000 to $149,999",
 HC01_VC123,"Estimate; VALUE - Owner-occupied units - $150,000 to $199,999",
 HC02_VC123,"Margin of Error; VALUE - Owner-occupied units - $150,000 to $199,999",
-HC03_VC123,"Percent; VALUE - Owner-occupied units - $150,000 to $199,999",
+HC03_VC123,"Percent; VALUE - Owner-occupied units - $150,000 to $199,999",x
 HC04_VC123,"Percent Margin of Error; VALUE - Owner-occupied units - $150,000 to $199,999",
 HC01_VC124,"Estimate; VALUE - Owner-occupied units - $200,000 to $299,999",
 HC02_VC124,"Margin of Error; VALUE - Owner-occupied units - $200,000 to $299,999",
-HC03_VC124,"Percent; VALUE - Owner-occupied units - $200,000 to $299,999",
+HC03_VC124,"Percent; VALUE - Owner-occupied units - $200,000 to $299,999",x
 HC04_VC124,"Percent Margin of Error; VALUE - Owner-occupied units - $200,000 to $299,999",
 HC01_VC125,"Estimate; VALUE - Owner-occupied units - $300,000 to $499,999",
 HC02_VC125,"Margin of Error; VALUE - Owner-occupied units - $300,000 to $499,999",
-HC03_VC125,"Percent; VALUE - Owner-occupied units - $300,000 to $499,999",
+HC03_VC125,"Percent; VALUE - Owner-occupied units - $300,000 to $499,999",x
 HC04_VC125,"Percent Margin of Error; VALUE - Owner-occupied units - $300,000 to $499,999",
 HC01_VC126,"Estimate; VALUE - Owner-occupied units - $500,000 to $999,999",
 HC02_VC126,"Margin of Error; VALUE - Owner-occupied units - $500,000 to $999,999",
-HC03_VC126,"Percent; VALUE - Owner-occupied units - $500,000 to $999,999",
+HC03_VC126,"Percent; VALUE - Owner-occupied units - $500,000 to $999,999",x
 HC04_VC126,"Percent Margin of Error; VALUE - Owner-occupied units - $500,000 to $999,999",
 HC01_VC127,"Estimate; VALUE - Owner-occupied units - $1,000,000 or more",
 HC02_VC127,"Margin of Error; VALUE - Owner-occupied units - $1,000,000 or more",
-HC03_VC127,"Percent; VALUE - Owner-occupied units - $1,000,000 or more",
+HC03_VC127,"Percent; VALUE - Owner-occupied units - $1,000,000 or more",x
 HC04_VC127,"Percent Margin of Error; VALUE - Owner-occupied units - $1,000,000 or more",
 HC01_VC128,Estimate; VALUE - Owner-occupied units - Median (dollars),x
 HC02_VC128,Margin of Error; VALUE - Owner-occupied units - Median (dollars),
 HC03_VC128,Percent; VALUE - Owner-occupied units - Median (dollars),
 HC04_VC128,Percent Margin of Error; VALUE - Owner-occupied units - Median (dollars),
-HC01_VC132,Estimate; MORTGAGE STATUS - Owner-occupied units,x
+HC01_VC132,Estimate; MORTGAGE STATUS - Owner-occupied units,
 HC02_VC132,Margin of Error; MORTGAGE STATUS - Owner-occupied units,
-HC03_VC132,Percent; MORTGAGE STATUS - Owner-occupied units,
+HC03_VC132,Percent; MORTGAGE STATUS - Owner-occupied units,x
 HC04_VC132,Percent Margin of Error; MORTGAGE STATUS - Owner-occupied units,
-HC01_VC133,Estimate; MORTGAGE STATUS - Owner-occupied units - Housing units with a mortgage,x
+HC01_VC133,Estimate; MORTGAGE STATUS - Owner-occupied units - Housing units with a mortgage,
 HC02_VC133,Margin of Error; MORTGAGE STATUS - Owner-occupied units - Housing units with a mortgage,
-HC03_VC133,Percent; MORTGAGE STATUS - Owner-occupied units - Housing units with a mortgage,
+HC03_VC133,Percent; MORTGAGE STATUS - Owner-occupied units - Housing units with a mortgage,x
 HC04_VC133,Percent Margin of Error; MORTGAGE STATUS - Owner-occupied units - Housing units with a mortgage,
 HC01_VC134,Estimate; MORTGAGE STATUS - Owner-occupied units - Housing units without a mortgage,
 HC02_VC134,Margin of Error; MORTGAGE STATUS - Owner-occupied units - Housing units without a mortgage,
@@ -405,9 +406,9 @@ HC01_VC146,Estimate; SELECTED MONTHLY OWNER COSTS (SMOC) - Housing units with a 
 HC02_VC146,Margin of Error; SELECTED MONTHLY OWNER COSTS (SMOC) - Housing units with a mortgage - Median (dollars),
 HC03_VC146,Percent; SELECTED MONTHLY OWNER COSTS (SMOC) - Housing units with a mortgage - Median (dollars),
 HC04_VC146,Percent Margin of Error; SELECTED MONTHLY OWNER COSTS (SMOC) - Housing units with a mortgage - Median (dollars),
-HC01_VC148,Estimate; SELECTED MONTHLY OWNER COSTS (SMOC) - Housing units without a mortgage,x
+HC01_VC148,Estimate; SELECTED MONTHLY OWNER COSTS (SMOC) - Housing units without a mortgage,
 HC02_VC148,Margin of Error; SELECTED MONTHLY OWNER COSTS (SMOC) - Housing units without a mortgage,
-HC03_VC148,Percent; SELECTED MONTHLY OWNER COSTS (SMOC) - Housing units without a mortgage,
+HC03_VC148,Percent; SELECTED MONTHLY OWNER COSTS (SMOC) - Housing units without a mortgage,x
 HC04_VC148,Percent Margin of Error; SELECTED MONTHLY OWNER COSTS (SMOC) - Housing units without a mortgage,
 HC01_VC149,Estimate; SELECTED MONTHLY OWNER COSTS (SMOC) - Housing units without a mortgage - Less than $250,
 HC02_VC149,Margin of Error; SELECTED MONTHLY OWNER COSTS (SMOC) - Housing units without a mortgage - Less than $250,
@@ -501,9 +502,9 @@ HC01_VC179,Estimate; SELECTED MONTHLY OWNER COSTS AS A PERCENTAGE OF HOUSEHOLD I
 HC02_VC179,Margin of Error; SELECTED MONTHLY OWNER COSTS AS A PERCENTAGE OF HOUSEHOLD INCOME (SMOCAPI) - Not computed,
 HC03_VC179,Percent; SELECTED MONTHLY OWNER COSTS AS A PERCENTAGE OF HOUSEHOLD INCOME (SMOCAPI) - Not computed,
 HC04_VC179,Percent Margin of Error; SELECTED MONTHLY OWNER COSTS AS A PERCENTAGE OF HOUSEHOLD INCOME (SMOCAPI) - Not computed,
-HC01_VC183,Estimate; GROSS RENT - Occupied units paying rent,x
+HC01_VC183,Estimate; GROSS RENT - Occupied units paying rent,
 HC02_VC183,Margin of Error; GROSS RENT - Occupied units paying rent,
-HC03_VC183,Percent; GROSS RENT - Occupied units paying rent,
+HC03_VC183,Percent; GROSS RENT - Occupied units paying rent,x
 HC04_VC183,Percent Margin of Error; GROSS RENT - Occupied units paying rent,
 HC01_VC184,Estimate; GROSS RENT - Occupied units paying rent - Less than $500,
 HC02_VC184,Margin of Error; GROSS RENT - Occupied units paying rent - Less than $500,
@@ -537,9 +538,9 @@ HC01_VC191,Estimate; GROSS RENT - Occupied units paying rent - Median (dollars),
 HC02_VC191,Margin of Error; GROSS RENT - Occupied units paying rent - Median (dollars),
 HC03_VC191,Percent; GROSS RENT - Occupied units paying rent - Median (dollars),
 HC04_VC191,Percent Margin of Error; GROSS RENT - Occupied units paying rent - Median (dollars),
-HC01_VC194,Estimate; GROSS RENT - No rent paid,x
+HC01_VC194,Estimate; GROSS RENT - No rent paid,
 HC02_VC194,Margin of Error; GROSS RENT - No rent paid,
-HC03_VC194,Percent; GROSS RENT - No rent paid,
+HC03_VC194,Percent; GROSS RENT - No rent paid,x
 HC04_VC194,Percent Margin of Error; GROSS RENT - No rent paid,
 HC01_VC198,Estimate; GROSS RENT AS A PERCENTAGE OF HOUSEHOLD INCOME (GRAPI) - Occupied units paying rent (excluding units where GRAPI cannot be computed),
 HC02_VC198,Margin of Error; GROSS RENT AS A PERCENTAGE OF HOUSEHOLD INCOME (GRAPI) - Occupied units paying rent (excluding units where GRAPI cannot be computed),
