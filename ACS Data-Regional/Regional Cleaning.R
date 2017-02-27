@@ -74,12 +74,30 @@ keeps <- function(file,n=-1){
 Housing_keeps <- keeps('ACS Data-Regional/ACS_15_1YR_DP04_metadata.csv')
 Demo_keeps <- keeps('ACS Data-Regional/ACS_15_1YR_DP05_metadata.csv')
 
+# Here's a function which bins stats in ACS files by quantile. It takes a data
+# frame and the vector of features to keep as arguments.
+
+quants <- function(df, keep){
+  # require dplyr - it has the 'ntile' function
+  require(dplyr)
+  # Subset the given data frame using the 'keep' vector
+  temp <- df[,keep]
+  # ignoring the first column, which contains the geography, replace the values
+  # within each column with the quantile calculated for each column
+  for (i in 2:ncol(temp)){
+    temp[[i]] <- ntile(temp[[i]],4)
+  }
+  # return the newly calculated data
+  temp
+}
+
+
 
 # Join Housing and Demographic features, by region. Simultaneously change
 # 'Geography' to 'region' for merging with primary data set later.
 
-ACS_combined <- inner_join(ACS_Housing[,Housing_keeps],
-                           ACS_Demo[,Demo_keeps],
+ACS_combined2 <- inner_join(quants(ACS_Housing,Housing_keeps),
+                           quants(ACS_Demo,Demo_keeps),
                            by = 'Geography') %>%
                 rename(state_name = Geography)
 
@@ -147,7 +165,18 @@ inspect(test_sub)
 
 
 
+ACS_combined2[,] <- lapply(ACS_combined2[,], as.factor)
 
+ACS_trans <- as(inner_join(ACS_combined2, shootings_filter )%>% select(
+  -id, -name, -date, -state_name, -age, -city, -state, -region), 'transactions')
+
+test <- apriori(ACS_trans, parameter = list(#supp = .01, conf = .25,
+                                                 minlen =2,maxlen=90, maxtime = 90,
+                                                 target = 'rules'))
+test_sub <- subset(test, subset = rhs %pin% 'outliers')
+
+inspect(head(sort(test_sub, by = 'lift')))
+inspect(test_sub)
 
 
 
