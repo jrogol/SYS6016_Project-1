@@ -6,14 +6,14 @@ library(caret)
 library(xgboost)
 library(pROC)
 setwd('/Users/meganstiles/Desktop/Data_Science/Spring_2017/Machine Learning/Project_1/')
-# From: https://github.com/washingtonpost/data-police-shootings
-#shootings <- read_csv('https://github.com/washingtonpost/data-police-shootings/raw/master/fatal-police-shootings-data.csv')
+From: https://github.com/washingtonpost/data-police-shootings
+shootings <- read_csv('https://github.com/washingtonpost/data-police-shootings/raw/master/fatal-police-shootings-data.csv')
 
 
-# Columns to factor
-#factors <- c(4,5,7:14)
+Columns to factor
+factors <- c(4,5,7:14)
 
-#shootings[, factors] <- lapply(shootings[, factors], as.factor)
+shootings[, factors] <- lapply(shootings[, factors], as.factor)
 
 # Create Response Variable
 
@@ -22,10 +22,10 @@ setwd('/Users/meganstiles/Desktop/Data_Science/Spring_2017/Machine Learning/Proj
 #shootings$attackGun[shootings$armed=='hatchet and gun' | shootings$armed=='machete and gun'] <- 1
 #Drop Unneeded Columns
 
-#clean<- shootings[, -c(1,2,5,9,10,12)]
+clean<- shootings[, -c(1:4,9,10,14)]
 
 
-#write_csv(clean, 'Shootings_Data.csv') #Accessed on February 22, 2016 at 5 :00 pm E.T.
+write_csv(clean, 'Shootings_Data.csv') #Accessed on February 22, 2016 at 5 :00 pm E.T.
 
 #Read in clean csv
 
@@ -54,7 +54,20 @@ shootings<- shootings[!is.na(shootings$flee),]
 #Perform Mean Imputation on Age Variable
 shootings$age[is.na(shootings$age)]<- mean(shootings$age, na.rm=TRUE)
 
-#Random Forest
+#Remove Missing Armed Values
+shootings<- shootings[!is.na(shootings$armed),]
+
+#Bin Armed Values
+shootings$gun<- 0
+shootings$gun[shootings$armed=='hatchet and gun' | shootings$armed=='machete and gun']<- 1
+shootings$gun[shootings$armed == 'gun and knife' | shootings$armed =='guns and explosives']<- 1
+shootings$gun[shootings$armed == 'gun'] <- 1
+
+#drop Armed column
+shootings<- shootings[, -1]
+###############
+#Random Forest#
+###############
 
 #Set Training and Testing Sets
 
@@ -63,13 +76,13 @@ training.set = shootings[training.indices,]
 testing.set = shootings[-training.indices,]
 
 # Fit random forest
-rf.fit <- randomForest(attackGun ~., data = training.set)
+rf.fit <- randomForest(signs_of_mental_illness ~., data = training.set)
 
 # Predict testing data.
 predictions = predict(rf.fit, newdata = testing.set)
 
 # Output raw accuracy.
-sum(predictions == testing.set[,"attackGun"]) / nrow(testing.set) #57.959%
+sum(predictions == testing.set[,"signs_of_mental_illness"]) / nrow(testing.set) #57.959%
 
 #10-Fold CV
 
@@ -87,14 +100,14 @@ for (i in 1:10) {
   test = shootings[test.indices,]
   
   #train Model
-  model <- randomForest(attackGun ~., data = train)
+  model <- randomForest(signs_of_mental_illness ~., data = train)
   
   #Make predictions based on model for testing set
   predictions<- predict(rf.fit, newdata = test)
   
   #Calculate Accuracy
   
-  accuracy<-sum(predictions == test[,"attackGun"]) / nrow(test)
+  accuracy<-sum(predictions == test[,"signs_of_mental_illness"]) / nrow(test)
   
   #Store accuracy for each run in vector
   raw_accuracy[i]= accuracy
@@ -102,6 +115,58 @@ for (i in 1:10) {
 raw_accuracy
 mean(raw_accuracy) #73.06%
 
+
+############################
+###Mental Illness##########
+###########################
+
+mental<- shootings
+
+true.index<- sample(which(mental$signs_of_mental_illness == 'True'), 450)
+false.index<- sample(which(mental$signs_of_mental_illness == 'False'),1000)
+total.index<- c(true.index, false.index)
+
+training.set = mental[total.index,]
+testing.set = mental[-total.index,]
+
+# Fit random forest
+rf.fit <- randomForest(signs_of_mental_illness ~., data = training.set)
+
+# Predict testing data.
+predictions = predict(rf.fit, newdata = testing.set)
+
+# Output raw accuracy.
+sum(predictions == testing.set[,"signs_of_mental_illness"]) / nrow(testing.set) #57.959%
+
+table(predictions,testing.set$signs_of_mental_illness)
+
+#Validation
+set.seed(8)
+raw_accuracy<- vector()
+i=0
+for (i in 1:10) {
+  #Create testing indicies 
+  true.index<- sample(which(mental$signs_of_mental_illness == 'True'), 450)
+  false.index<- sample(which(mental$signs_of_mental_illness == 'False'),1000)
+  total.index<- c(true.index, false.index)
+  
+  training.set = mental[total.index,]
+  testing.set = mental[-total.index,]
+  
+  # Fit random forest
+  rf.fit <- randomForest(signs_of_mental_illness ~., data = training.set)
+  
+  # Predict testing data.
+  predictions = predict(rf.fit, newdata = testing.set)
+  
+  #Calculate Accuracy
+  accuracy<-sum(predictions == testing.set[,"signs_of_mental_illness"]) / nrow(testing.set)
+  
+  #Store accuracy for each run in vector
+  raw_accuracy[i]= accuracy
+}
+raw_accuracy
+mean(raw_accuracy) #73.06%
 
 ############################
 ### Tree Boosting###########
@@ -115,7 +180,7 @@ folds<- createFolds(shootings$attackGun, k=10, list = TRUE, returnTrain = FALSE)
 param <- list('booster' = 'gbtree',
               "objective" = "multi:softprob",    
               "num_class" = 2,
-              'max_depth' = 6,
+              'max_depth' = 3,
               'eval_metric' = 'merror')
 
 
@@ -132,9 +197,9 @@ for (i in 1:10) {
   test = shootings[test.indices,]
   
   #Convert to Matrix
-  train_X<-data.matrix(train[,1:8])
+  train_X<-data.matrix(train[,1:7])
   train_Y<- data.matrix(train$attackGun)
-  test_X<- data.matrix(test[,1:8])
+  test_X<- data.matrix(test[,1:7])
   test_Y<- data.matrix(test$attackGun)
   
   #train Model
@@ -181,7 +246,7 @@ prf <- performance(pr, measure = "tpr", x.measure = "fpr")
 auc<- performance(pr, "auc")@y.values[[1]] 
 auc #0.6554
 plot(prf)
-library(pROC)
+
 
 ###############################
 #LR Boosting#################
@@ -207,9 +272,9 @@ for (i in 1:10) {
   test = shootings[test.indices,]
   
   #Convert to Matrix
-  train_X<-data.matrix(train[,1:8])
+  train_X<-data.matrix(train[,1:7])
   train_Y<- data.matrix(train$attackGun)
-  test_X<- data.matrix(test[,1:8])
+  test_X<- data.matrix(test[,1:7])
   test_Y = data.matrix(test$attackGun)
   
   #train Model
