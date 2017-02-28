@@ -3,7 +3,6 @@ library(readr)
 library(dplyr)
 library(lubridate)
 
-
 #### Read in the Initial Data ####
 
 # Read in the WaPo fatal shootings data
@@ -25,6 +24,15 @@ shootings <- shootings %>%
   mutate(age_bin = cut(shootings$age,c(0,17,24,34,44,54,64,200),
                        include.lowest = F, right = T, ordered_result = T))
 
+#collapse armed factor levels into armed, not armed and undermined
+armed_levels <- as.list(levels(shootings$armed))
+armed_levels[[61]] <- NULL #removing unarmed
+armed_levels[[61]] <- NULL #removing undetermined
+levels(shootings$armed)[levels(shootings$armed)%in%c(armed_levels)] <- "armed" #collapsed the factors into either armed or unarmed
+
+#get summary statistics for each of the variables in social and economic files 
+#and calculate summary statistics on each of the percentages to get the bottom 25%, the middle 50% and the top 25%
+
 #### Read in the American Communities Survey Data from 2015 ####
 
 # ACS data obtained from:
@@ -34,30 +42,73 @@ shootings <- shootings %>%
 # Create vectors containing the states within each region, add a new variable to
 # 'shootings' containing the appropriate region
 
-NE <- c("CT","ME","MA","NH","RI","VT",
-        "NJ","NY","PA")
-MW <- c("IL","IN","MI","OH","WI",
-        "IA","KS","MN","MS","NE", "ND","SD")
-So <- c("DE","FL","GA","MD","NC","SC","VA","DC","WV",
-        "AL","KY","MS","TN",
-        "AR","LA","OK","TX")
-We <-c("AZ","CO","ID","MT","NV","NM","UT", "WY",
-       "AK","CA","HI","OR","WA")
+# NE <- c("CT","ME","MA","NH","RI","VT",
+#         "NJ","NY","PA")
+# MW <- c("IL","IN","MI","OH","WI",
+#         "IA","KS","MN","MS","NE", "ND","SD")
+# So <- c("DE","FL","GA","MD","NC","SC","VA","DC","WV",
+#         "AL","KY","MS","TN",
+#         "AR","LA","OK","TX")
+# We <-c("AZ","CO","ID","MT","NV","NM","UT", "WY",
+#        "AK","CA","HI","OR","WA")
+# 
+# shootings$region <-
+#   ifelse(shootings$state %in% NE,
+#          'Northeast Region',
+#          ifelse(shootings$state %in% MW,
+#                 'Midwest Region',
+#                 ifelse(shootings$state %in% So,
+#                        'South Region',
+#                        'West Region')))
 
-shootings$region <-
-  ifelse(shootings$state %in% NE,
-         'Northeast Region',
-         ifelse(shootings$state %in% MW,
-                'Midwest Region',
-                ifelse(shootings$state %in% So,
-                       'South Region',
-                       'West Region')))
-
-#Reading in the ACS Regional Data looking at the social and economic files
-ACS_Social <- read_csv('ACS Data-Regional/ACS_15_1YR_DP02_with_ann.csv',
+#Reading in the ACS Data by state and looking at the social and economic files
+ACS_Social <- read_csv('ACS Data-Regional/ACS_byState/ACS_15_1YR_DP02_with_ann.csv',
                         na = c('','NA','(X)','N'),skip = 1)
-ACS_Econ <- read_csv('ACS Data-Regional/ACS_15_1YR_DP03_with_ann.csv',
+ACS_Econ <- read_csv('ACS Data-Regional/ACS_byState/ACS_15_1YR_DP03_with_ann.csv',
                      na = c('','NA','(X)','N'),skip = 1)
+
+#Convert the state names to abbreviations
+library(datasets)
+data(state)
+
+#state to abbreviation conversion
+abb2state <- function(name, convert = F, strict = F){
+  data(state)
+  # state data doesn't include DC
+  state = list()
+  state[['name']] = c(state.name,"District Of Columbia")
+  state[['abb']] = c(state.abb,"DC")
+  
+  if(convert) state[c(1,2)] = state[c(2,1)]
+  
+  single.a2s <- function(s){
+    if(strict){
+      is.in = tolower(state[['abb']]) %in% tolower(s)
+      ifelse(any(is.in), state[['name']][is.in], NA)
+    }else{
+      # To check if input is in state full name or abb
+      is.in = rapply(state, function(x) tolower(x) %in% tolower(s), how="list")
+      state[['name']][is.in[[ifelse(any(is.in[['name']]), 'name', 'abb')]]]
+    }
+  }
+  sapply(name, single.a2s)
+}
+
+#demo
+abb2state('South Carolina', convert = T)
+
+ACS_Social$State <- abb2state(ACS_Social$Geography, convert = T)
+ACS_Econ$State <- abb2state(ACS_Econ$Geography, convert = T)
+
+#use this function down here to isolate the outliers of the states with the highest shootings
+cities <- shootings %>%
+  group_by(state, city) %>%
+  count() %>%
+  arrange(desc(n))
+
+summary(cities)
+plot(cities)
+outliers <- c('CA', 'TX')
 
 # ACS comes with a metadata CSV, listing all the included variables by name. 
 # These files were amended in a text editor, indicating the files to keep with
@@ -70,8 +121,8 @@ keeps <- function(file){
   which(!is.na(temp$Keep))
 }
 
-Social_keeps <- keeps('ACS Data-Regional/ACS_15_1YR_DP02_metadata.csv')
-Econ_keeps <- keeps('ACS Data-Regional/ACS_15_1YR_DP03_metadata.csv')
+Social_keeps <- keeps('ACS Data-Regional/ACS_byState/ACS_15_1YR_DP02_metadata.csv') #have to go back and edit this
+Econ_keeps <- keeps('ACS Data-Regional/ACS_byState/ACS_15_1YR_DP03_metadata.csv')
 
 
 # Join Social and Economic features, by region. Simultaneously change
@@ -86,6 +137,9 @@ ACS_combined <- inner_join(ACS_Social[,Social_keeps],
 
 shootings_joined <- inner_join(shootings, ACS_combined,
                                by = 'region')
+
+
+
 
 ############################PREDICTIVE MODELING######################################################
 
@@ -128,3 +182,8 @@ fit <- randomForest(as.factor(race) ~ .,
                     data=shootings2015, 
                     importance=TRUE, 
                     ntree=100)
+
+#For association analysis would want to have the same left hand side to make a one-to-one comparison
+
+
+
