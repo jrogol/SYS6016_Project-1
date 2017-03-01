@@ -9,6 +9,7 @@ library(arules)
 # Read in the WaPo fatal shootings data
 # From: https://github.com/washingtonpost/data-police-shootings
 shootings <- read_csv('https://github.com/washingtonpost/data-police-shootings/raw/master/fatal-police-shootings-data.csv')
+# last accessed 3/1/17 at 6:39 PM EST
 
 # Turn character Columns to factors (where appropriate)
 factors <- c(4,5,7:14)
@@ -24,6 +25,12 @@ shootings <- shootings %>%
 shootings <- shootings %>%
   mutate(age_bin = cut(shootings$age,c(0,17,24,34,44,54,64,200),
                        include.lowest = F, right = T, ordered_result = T))
+
+# Bin armed into: armed, not armed and undetermined
+armed_levels <- as.list(levels(shootings$armed))
+armed_levels[[61]] <- NULL #removing unarmed
+armed_levels[[61]] <- NULL #removing undetermined
+levels(shootings$armed)[levels(shootings$armed)%in%c(armed_levels)] <- "armed" #collapsed the factors into either armed or unarmed
 
 #### Read in the American Communities Survey Data from 2015 ####
 
@@ -93,10 +100,18 @@ quants <- function(df, keep){
 
 
 
-# Join Housing and Demographic features, by region. Simultaneously change
-# 'Geography' to 'region' for merging with primary data set later.
+# Create filtered data sets for both ACS files, and combine them.
+# Join Housing and Demographic features, by state. Simultaneously change
+# 'Geography' to 'state_name' for merging with primary data set later.
 
-ACS_combined2 <- inner_join(quants(ACS_Housing,Housing_keeps),
+ACS_Housing_filtered <- quants(ACS_Housing,Housing_keeps) %>%
+  rename(state_name = Geography)
+
+ACS_Demo_filtered <- quants(ACS_Demo,Demo_keeps) %>%
+  rename(state_name = Geography)
+
+
+ACS_combined <- inner_join(quants(ACS_Housing,Housing_keeps),
                            quants(ACS_Demo,Demo_keeps),
                            by = 'Geography') %>%
                 rename(state_name = Geography)
@@ -123,7 +138,6 @@ shootings <- inner_join(shootings, states,
 # Filter for 2015 and 2016 only
 shootings_filter <- shootings %>% filter(year <= 2016)
 
-
 # Look at the number of deaths, aggregated by state
 state_count <- shootings_filter %>%
   group_by(state) %>% 
@@ -135,9 +149,37 @@ state_count <- shootings_filter %>%
 state_count %>% 
   filter(n >= mean(n)+2*sd(n))
 
-# Create a new variable separating CA and TX from other states!
+# California and Texas are also two of the most populous sttes in the union. Thus, 
+# the counts should be normalized. In this case, the fourth column of ACS_Demo
+# (Estimate; SEX AND AGE - Total population) contains estimates for state
+# population. The per-state count will be divided by this number and multiplied
+# by 1 million in order to see the number of shootings per million occupants in
+# the state.
+
+# Create the state populations, joined with the state abbriviations in
+# preparation for an additional join
+state_pop <- inner_join(states, 
+                        ACS_Demo[,c('Estimate; SEX AND AGE - Total population','Geography')],
+                        by = c("state_name" = 'Geography')) %>%
+  rename(pop =`Estimate; SEX AND AGE - Total population`, state = abb) %>%
+  select(pop, state)
+
+# Join the state populations and create a new feature "shootings per milion
+# residents"
+state_count <- inner_join(state_count, state_pop) %>% 
+  mutate(adjCount = n*1000000/pop) %>% 
+  arrange(desc(adjCount))
+
+# Look for states whose cumulative total is more than 2 standard deviations
+# above the new feature's mean
+state_count %>% 
+  filter(adjCount >= mean(adjCount)+2*sd(adjCount))
+
+# This yeilds three states: New Mexico, Alaska and Oklahoma
+
+# Create a new variable separating NM, AK and OK  from other states!
 two_sd <- (state_count %>% 
-  filter(n >= mean(n)+2*sd(n)))$state
+             filter(adjCount >= mean(adjCount)+2*sd(adjCount)))$state
 
 shootings_filter <- shootings_filter %>% 
   mutate(outliers = state %in% two_sd)
@@ -148,7 +190,7 @@ shootings_filter <- shootings_filter %>%
 # Turn everything into factors
 shootings_filter[,] <- lapply(shootings_filter[,], as.factor)
 
-# Create the transactions
+# Create the transactions for the shootings data set only.
 shooting_trans <- as(shootings_filter %>% select(
   -id, -name, -date, -state_name, -age, -city, -state, -region), 'transactions')
 
@@ -158,9 +200,9 @@ test <- apriori(shooting_trans, parameter = list(supp = .01, conf = .25,
                                          minlen =2,maxlen=90, target = 'rules'))
 
 
-test_sub <- subset(test, subset = rhs %pin% 'outliers' & lhs %pin% 'age')
+test_sub <- subset(test, subset = rhs %pin% 'outliers' & lhs %pin% 'body_')
 
-inspect(head(sort(test_sub, by = 'confidence')))
+inspect(head(sort(test_sub, by = 'lift')))
 inspect(test_sub)
 
 
