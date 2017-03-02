@@ -30,34 +30,8 @@ armed_levels[[61]] <- NULL #removing unarmed
 armed_levels[[61]] <- NULL #removing undetermined
 levels(shootings$armed)[levels(shootings$armed)%in%c(armed_levels)] <- "armed" #collapsed the factors into either armed or unarmed
 
+
 #### Read in the American Communities Survey Data from 2015 ####
-
-# ACS data obtained from:
-# https://factfinder.census.gov/faces/nav/jsf/pages/searchresults.xhtml?refresh=t
-# Data was broken down regionally.
-
-# Create vectors containing the states within each region, add a new variable to
-# 'shootings' containing the appropriate region
-
-# NE <- c("CT","ME","MA","NH","RI","VT",
-#         "NJ","NY","PA")
-# MW <- c("IL","IN","MI","OH","WI",
-#         "IA","KS","MN","MS","NE", "ND","SD")
-# So <- c("DE","FL","GA","MD","NC","SC","VA","DC","WV",
-#         "AL","KY","MS","TN",
-#         "AR","LA","OK","TX")
-# We <-c("AZ","CO","ID","MT","NV","NM","UT", "WY",
-#        "AK","CA","HI","OR","WA")
-# 
-# shootings$region <-
-#   ifelse(shootings$state %in% NE,
-#          'Northeast Region',
-#          ifelse(shootings$state %in% MW,
-#                 'Midwest Region',
-#                 ifelse(shootings$state %in% So,
-#                        'South Region',
-#                        'West Region')))
-
 #Reading in the ACS Data by state and looking at the social and economic files
 ACS_Social <- read_csv('ACS Data-Regional/ACS_byState/ACS_15_1YR_DP02_with_ann.csv',
                         na = c('','NA','(X)','N'),skip = 1)
@@ -91,9 +65,19 @@ abb2state <- function(name, convert = F, strict = F){
   sapply(name, single.a2s)
 }
 
-#demo
-abb2state('South Carolina', convert = T)
+#creating a state list with the names and abbreviations
+state[['name']] = c(state.name,"District Of Columbia")
+state[['abb']] = c(state.abb,"DC")
 
+#creating a dataframe of state names
+state_name <- as.data.frame(unclass(state[1]))
+colnames(state_name) <- c('state')
+
+#creating a dataframe of state abbreviations
+state_abb <- as.data.frame(unclass(state[2]))
+colnames(state_abb) <- c('state')
+
+#converting state names in Social and Economic fiels to abbreviations
 ACS_Social$Geography <- abb2state(ACS_Social$Geography, convert = T)
 ACS_Econ$Geography <- abb2state(ACS_Econ$Geography, convert = T)
 
@@ -104,7 +88,7 @@ ACS_Econ$Geography <- abb2state(ACS_Econ$Geography, convert = T)
 
 # A Simple function reads these files, and returns the indicies of the variables to keep.
 
-keeps <- function(file){
+keeps <- function(file){ #modify these files again
   temp <- read_csv(file)
   which(!is.na(temp$Keep))
 }
@@ -112,24 +96,49 @@ keeps <- function(file){
 Social_keeps <- keeps('ACS Data-Regional/ACS_byState/ACS_15_1YR_DP02_metadata.csv')
 Econ_keeps <- keeps('ACS Data-Regional/ACS_byState/ACS_15_1YR_DP03_metadata.csv')
 
+#selecting the variables of interest from Social and Economic Files
+ACS_S <- ACS_Social[,Social_keeps] %>% rename(state = Geography)
+ACS_S$state <- as.factor(ACS_S$state)
+ACS_E <- ACS_Econ[,Econ_keeps] %>% rename(state = Geography)
+ACS_E$state <- as.factor(ACS_E$state)
 
-# Join Social and Economic features, by region. Simultaneously change
-# 'Geography' to 'region' for merging with primary data set later.
+#combine Social with shootings by state
+shootings_Social <- inner_join(shootings, ACS_S, by = "state")
 
-ACS_combined <- inner_join(ACS_Social[,Social_keeps],
-                           ACS_Econ[,Econ_keeps],
-                           by ="Geography" ) %>%
-  rename(state = Geography)
+#remove the population total estimate column (was kept for purposes later on)
+shootings_Social <- shootings_Social[, -21]
 
-#convert state column to a factor
-ACS_combined$state <- as.factor(ACS_combined$state)
+#for numeric variables in shootings_Social, segment the values into n bins
+for (i in 19:ncol(shootings_Social)) {
+  shootings_Social[[i]] <- ntile(shootings_Social[[i]], 4)
+}
+
+#filter shootings_Social to years 2015 and 2016
+Social_filter <- shootings_Social %>% filter(year <= 2016)
+
+#combine Economic with shootings by state
+shootings_Econ <- inner_join(shootings, ACS_E, by = "state")
+
+#for numeric variables in shootings_Econ, segment the values into n bins
+for (i in 19:ncol(shootings_Econ)) {
+  shootings_Econ[[i]] <- ntile(shootings_Econ[[i]], 4)
+}
+
+#filter shootings_Econ to years 2015 and 2016
+Econ_filter <- shootings_Econ %>% filter(year <= 2016)
+
+# Join Social and Economic features, by state. Simultaneously change
+# 'Geography' to 'state' for merging with primary data set later.
+ACS_combined <- inner_join(ACS_S,
+                           ACS_E,
+                           by ="state" )
 
 # Join the ACS data with the shooting data (on state)
 shootings_joined <- inner_join(shootings, ACS_combined,
                                by = 'state')
 
-#get summary statistics for each of the variables in social and economic files 
-#and calculate summary statistics on each of the percentages to get the bottom 25%, the middle 50% and the top 25%
+#remove the total population estimate column
+shootings_joined <- shootings_joined[,-21]
 
 #for the numeric variables in shootings_joined, segment the range of values into n bins
 for (i in 19:ncol(shootings_joined)) {
@@ -145,16 +154,31 @@ state_shoot <- shootings_filter %>%
   count() %>%
   arrange(desc(n))
 
-cities <- shootings_filter %>%
-  group_by(city, state) %>%
-  count() %>%
-  arrange(desc(n))
+# Create the state populations (from the ACS_S df with total population estimate), joined with the state abbreviations in
+# preparation for an additional join
+state_pop <- inner_join(state_abb, 
+                        ACS_S[,c('Estimate; PLACE OF BIRTH - Total population','state')],
+                        by = "state") %>%
+  rename(pop =`Estimate; PLACE OF BIRTH - Total population`) %>%
+  select(pop, state)
 
-state_2sd <- (state_shoot %>% filter(n >= mean(n)+2*sd(n)))$state
+# Join the state populations and create a new feature "shootings per milion
+# residents"
+state_shoot <- inner_join(state_shoot, state_pop, by = "state") %>% 
+  mutate(adjCount = n*1000000/pop) %>% 
+  arrange(desc(adjCount))
+
+#creating a new variable that looks for states with population counts two standard deviations above the mean
+#find that NM, AK, OK are two std devs above mean
+state_2sd <- (state_shoot %>% filter(adjCount >= mean(adjCount)+2*sd(adjCount)))$state
 
 #find the states with 2 standard deviations above the mean
 shootings_filter <- shootings_filter %>% 
   mutate(outliers = state %in% state_2sd)
+
+#find the states with 2 standard deviations above the mean for Social_filter and Econ_filter dfs
+Social_filter <- Social_filter %>% mutate(outliers = state %in% state_2sd)
+Econ_filter <- Econ_filter %>% mutate(outliers = state %in% state_2sd)
 
 #########################################ASSOCIATION RULES ANALYSIS#################################
 library(arules)
@@ -164,123 +188,74 @@ shootings_filter[,] <- lapply(shootings_filter, as.factor)
 
 # Create the transactions
 shooting_trans <- as(shootings_filter %>% select(
-  -id, -name, -date, -age, -city), 'transactions')
+  -id, -name, -date, -age, -city, -state), 'transactions')
 
-#test <- apriori(shooting_trans, parameter = list(minlen =2,maxlen=20, target = 'rules'))
-test <- apriori(shooting_trans, parameter = list(support = 0.15, confidence = 0.8, minlen =2, maxlen =90, target = 'rules'))
-#restricting the right hand side to just the outliers
-test_sub <- subset(test, subset = rhs %pin% 'outliers')
-inspect(head(sort(test_sub, by = 'lift'), 20))
-inspect(tail(test_sub, 20))
+test <- apriori(shooting_trans, parameter = list(support = 0.05, confidence = 0.3, minlen =2, maxlen =90, maxtime=90, target = 'rules'))
 
-#will have to try different combinations of these of the above and also combine the other ACS data to this
-#within states perhaps do a city-level analysis?
-#within the outliers are there certain cities that have more police deaths
+#restricting the right hand side to outliers = TRUE
+test_sub <- subset(test, subset = rhs %pin% 'outliers=TRUE')
+summary(test_sub)
+inspect(head(sort(test_sub, by = 'lift'), 5))
 
-#Decision Trees
-library(C50)
-library(plyr)
+#restricting the right hand side to outliers= FALSE
+test_sub_false <- subset(test, subset = rhs %pin% 'outliers=FALSE')
+summary(test_sub_false)
+inspect(head(sort(test_sub_false, by = 'lift'), 5))
 
-#drop all cases of missing values
-shootings_nomissing <- shootings_filter[complete.cases(shootings_filter),]
+#0.04, 0.3
+test_1 <- apriori(shooting_trans, parameter = list(support = 0.05, confidence = 0.2, minlen =2,maxlen=90, maxtime = 90, target = 'rules'))
+test_sub <- subset(test_1, subset = rhs %pin% 'outliers=TRUE')
+summary(test_sub)
+inspect(head(sort(test_sub, by = 'lift'), 5))
 
-dt_shooting <- shootings_nomissing %>% select(-id, -name, -date, -age, -city, -state)
-#have to account for the spaces in some of the column names to avoid a parsing error
-colnames(dt_shooting) <- gsub(" ","",colnames(dt_shooting))
-colnames(dt_shooting) <- gsub(";","",colnames(dt_shooting))
-colnames(dt_shooting) <- gsub("-","",colnames(dt_shooting))
+#restricting the right hand side to outliers= FALSE
+test_sub_false <- subset(test_1, subset = rhs %pin% 'outliers=FALSE')
+summary(test_sub_false)
+inspect(head(sort(test_sub_false, by = 'lift'), 5))
 
-set.seed(12345)
-dt_rand <- dt_shooting[order(runif(dim(dt_shooting)[1])), ]
+#getting really interesting rules! - makes sense
 
-#10-fold cross validation code
-accuracy.c50 <- rep(NA, length(folds))
-# form <- "outliers ~ manner_of_death + armed + gender + race + signs_of_mental_illness + threat_level + flee + body_camera + wday + month + year + age_bin +
-# PercentVETERANSTATUSCivilianpopulation18yearsandoverCivilianveterans + PercentDISABILITYSTATUSOFTHECIVILIANNONINSTITUTIONALIZEDPOPULATIONTotalCivilianNoninstitutionalizedPopulationWithadisability +
-# PercentPLACEOFBIRTHTotalpopulationNative + PercentPLACEOFBIRTHTotalpopulationForeignborn + PercentU.S.CITIZENSHIPSTATUSForeignbornpopulationNotaU.S.citizen + PercentEMPLOYMENTSTATUSPopulation16yearsandoverInlaborforce +
-# PercentEMPLOYMENTSTATUSPopulation16yearsandoverInlaborforceCivilianlaborforceEmployed + PercentEMPLOYMENTSTATUSPopulation16yearsandoverInlaborforceCivilianlaborforceUnemployed +
-# PercentPERCENTAGEOFFAMILIESANDPEOPLEWHOSEINCOMEINTHEPAST12MONTHSISBELOWTHEPOVERTYLEVELAllfamilies" 
-folds <- split(dt_rand, cut(sample(1:nrow(dt_rand)),10))
-for (i in 1:length(folds)) {
-  test <- ldply(folds[i], data.frame)
-  test <- test[, -1]
-  train <- ldply(folds[-i], data.frame)
-  train <- train[, -1]
-  tmp.model <- C5.0(train[-22], train$outliers) #had to ignore column 18, 'veil type', because it has only 1 level
-  #plot(tmp.model)
-  tmp.predict <- predict(tmp.model, test, type='class')
-  conf.mat <- table(test$outliers, tmp.predict)
-  accuracy.c50[i] <- 100*sum(diag(conf.mat))/sum(conf.mat)
-}
-mean(accuracy.c50) #99.89011% 
+#################Econ + Shootings#######################
+#now getting rules for just social+shootings combined and economic+shootings combined
+Econ_filter[,] <- lapply(Econ_filter, as.factor)
 
-#plot(tmp.model)
+# Create the transactions
+Econ_trans <- as(Econ_filter %>% select(
+  -id, -name, -date, -age, -city, -state), 'transactions')
+
+test_Econ <- apriori(Econ_trans, parameter = list(support = 0.02, confidence = 0.3, minlen =2, maxlen =90, maxtime=90, target = 'rules'))
+
+#restricting the right hand side to outliers = TRUE
+test_econ_true <- subset(test_Econ, subset = rhs %pin% 'outliers=TRUE')
+summary(test_econ_true)
+inspect(head(sort(test_econ_true, by = 'lift'), 5))
+
+#restricting the right hand side to outliers= FALSE
+test_econ_false <- subset(test_Econ, subset = rhs %pin% 'outliers=FALSE')
+summary(test_econ_false)
+inspect(head(sort(test_econ_false, by = 'lift'), 5))
 
 
-#############################BAYESIAN BELIEF NETWORKS########################################################
-library(bnlearn)
-
-#check to see which of the columns have missing values
-colnames(shootings_filter)[colSums(is.na(shootings_filter)) > 0]
-
-#drop all cases of missing values
-shootings_nomissing <- shootings_filter[complete.cases(shootings_filter),]
-
-#create the BNN
-bnn <- hc(shootings_nomissing %>% select(-id, -name, -date, -age, -city), na.exclude(shootings_nomissing))
-
-for(i in 1:dim(shootings_filter)[2]){
-  shootings_nomissing[[i]] = factor(shootings_nomissing[[i]],levels = levels(shootings_nomissing[[i]]))
-}
-
- 
+#go back and get more factors for economic
 
 
+###################################Social + Shootings#################################################
 
+#now getting rules for just social+shootings combined and economic+shootings combined
+Social_filter[,] <- lapply(Social_filter, as.factor)
 
-############################PREDICTIVE MODELING######################################################
+# Create the transactions
+Social_trans <- as(Social_filter %>% select(
+  -id, -name, -date, -age, -city, -state), 'transactions')
 
+test_Social <- apriori(Social_trans, parameter = list(support = 0.04, confidence = 0.5, minlen =2, maxlen =90, maxtime=90, target = 'rules'))
 
-shootings2015 <- shootings_joined[shootings_joined$year == 2015,]
-shootings2015 <- shootings2015[, -c(20, 33, 34, 35, 42, 48, 54, 64, 66, 68, 70, 72, 74, 81, 84, 85, 92, 99)]
-shootings2015 <- shootings2015[, -c(83, 87, 90, 94)]
+#restricting the right hand side to outliers = TRUE
+test_social_true <- subset(test_Social, subset = rhs %pin% 'outliers=TRUE')
+summary(test_social_true)
+inspect(head(sort(test_social_true, by = 'lift'), 5))
 
-
-#how to deal with the missing values
-
-shootings2015$age_bin <- as.factor(shootings2015$age_bin)
-shootings2015$age <- as.numeric(shootings2015$age)
-shootings2015$armed <- as.factor(shootings2015$armed)
-shootings2015$race <- as.factor(shootings2015$race)
-sapply(colnames(shootings2015)[colSums(is.na(shootings2015)) > 0], class)
-
-# shootings2015$armed <- addNA(shootings2015$armed)
-# shootings2015$race <- addNA(shootings2015$race)
-# shootings2015$flee <- addNA(shootings2015$age_bin)
-# shootings2015$age <- addNA(shootings2015$age)
-
-#removed all the missing values
-shootings2015 <- shootings2015[!is.na(shootings2015$race),]
-shootings2015 <- shootings2015[!is.na(shootings2015$age),]
-shootings2015 <- shootings2015[!is.na(shootings2015$armed),]
-shootings2015 <- shootings2015[!is.na(shootings2015$flee),]
-shootings2015 <- shootings2015[!is.na(shootings2015$age_bin),]
-
-#may need to try imputation
-
-#CART decision tree model
-library(rpart)
-fit <- rpart(race ~ . -id -name -date -age -city -threat_level -flee -year -region, data=shootings2015,
-             method="class")
-
-library(randomForest)
-shootings2015 <- subset(shootings2015, select = c(-id, -name, -date, -age, -city, -threat_level, -flee, -year, -region))
-fit <- randomForest(as.factor(race) ~ .,
-                    data=shootings2015, 
-                    importance=TRUE, 
-                    ntree=100)
-
-#For association analysis would want to have the same left hand side to make a one-to-one comparison
-
-
-
+#restricting the right hand side to outliers= FALSE
+test_social_false <- subset(test_Social, subset = rhs %pin% 'outliers=FALSE')
+summary(test_social_false)
+inspect(head(sort(test_social_false, by = 'lift'), 5))
