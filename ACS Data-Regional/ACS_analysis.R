@@ -2,6 +2,8 @@
 library(readr)
 library(dplyr)
 library(lubridate)
+library(datasets)
+library(arules)
 
 #### Read in the Initial Data ####
 
@@ -28,7 +30,7 @@ shootings <- shootings %>%
 armed_levels <- as.list(levels(shootings$armed))
 armed_levels[[61]] <- NULL #removing unarmed
 armed_levels[[61]] <- NULL #removing undetermined
-levels(shootings$armed)[levels(shootings$armed)%in%c(armed_levels)] <- "armed" #collapsed the factors into either armed or unarmed
+levels(shootings$armed)[levels(shootings$armed)%in%c(armed_levels)] <- "armed" 
 
 
 #### Read in the American Communities Survey Data from 2015 ####
@@ -39,9 +41,7 @@ ACS_Econ <- read_csv('ACS Data-Regional/ACS_byState/ACS_15_1YR_DP03_with_ann.csv
                      na = c('','NA','(X)','N'),skip = 1)
 
 #The function below converts state names to abbreviations (add convert = T) and vice versa (convert = F))
-library(datasets)
 data(state)
-
 #state to abbreviation conversion
 abb2state <- function(name, convert = F, strict = F){
   data(state)
@@ -66,6 +66,7 @@ abb2state <- function(name, convert = F, strict = F){
 }
 
 #creating a state list with the names and abbreviations
+state = list()
 state[['name']] = c(state.name,"District Of Columbia")
 state[['abb']] = c(state.abb,"DC")
 
@@ -88,7 +89,7 @@ ACS_Econ$Geography <- abb2state(ACS_Econ$Geography, convert = T)
 
 # A Simple function reads these files, and returns the indicies of the variables to keep.
 
-keeps <- function(file){ #modify these files again
+keeps <- function(file){ 
   temp <- read_csv(file)
   which(!is.na(temp$Keep))
 }
@@ -127,13 +128,12 @@ for (i in 19:ncol(shootings_Econ)) {
 #filter shootings_Econ to years 2015 and 2016
 Econ_filter <- shootings_Econ %>% filter(year <= 2016)
 
-# Join Social and Economic features, by state. Simultaneously change
-# 'Geography' to 'state' for merging with primary data set later.
+# Join Social and Economic features, by state.
 ACS_combined <- inner_join(ACS_S,
                            ACS_E,
                            by ="state" )
 
-# Join the ACS data with the shooting data (on state)
+# Join the ACS combined data with the shooting data (on state)
 shootings_joined <- inner_join(shootings, ACS_combined,
                                by = 'state')
 
@@ -181,8 +181,8 @@ Social_filter <- Social_filter %>% mutate(outliers = state %in% state_2sd)
 Econ_filter <- Econ_filter %>% mutate(outliers = state %in% state_2sd)
 
 #########################################ASSOCIATION RULES ANALYSIS#################################
-library(arules)
 
+####################RULES FOR COMBINED DATA
 #convert entire df into factors
 shootings_filter[,] <- lapply(shootings_filter, as.factor)
 
@@ -190,32 +190,20 @@ shootings_filter[,] <- lapply(shootings_filter, as.factor)
 shooting_trans <- as(shootings_filter %>% select(
   -id, -name, -date, -age, -city, -state), 'transactions')
 
-test <- apriori(shooting_trans, parameter = list(support = 0.05, confidence = 0.3, minlen =2, maxlen =90, maxtime=90, target = 'rules'))
+test <- apriori(shooting_trans, parameter = list(support = 0.05, confidence = 0.3, 
+                                                 minlen =2, maxlen =90, maxtime=90, target = 'rules'))
 
 #restricting the right hand side to outliers = TRUE
-test_sub <- subset(test, subset = rhs %pin% 'outliers=TRUE')
+test_sub <- subset(test, subset = rhs %in% 'outliers=TRUE')
 summary(test_sub)
 inspect(head(sort(test_sub, by = 'lift'), 5))
 
 #restricting the right hand side to outliers= FALSE
-test_sub_false <- subset(test, subset = rhs %pin% 'outliers=FALSE')
+test_sub_false <- subset(test, subset = rhs %in% 'outliers=FALSE')
 summary(test_sub_false)
 inspect(head(sort(test_sub_false, by = 'lift'), 5))
 
-#0.04, 0.3
-test_1 <- apriori(shooting_trans, parameter = list(support = 0.05, confidence = 0.2, minlen =2,maxlen=90, maxtime = 90, target = 'rules'))
-test_sub <- subset(test_1, subset = rhs %pin% 'outliers=TRUE')
-summary(test_sub)
-inspect(head(sort(test_sub, by = 'lift'), 5))
-
-#restricting the right hand side to outliers= FALSE
-test_sub_false <- subset(test_1, subset = rhs %pin% 'outliers=FALSE')
-summary(test_sub_false)
-inspect(head(sort(test_sub_false, by = 'lift'), 5))
-
-#getting really interesting rules! - makes sense
-
-#################Econ + Shootings#######################
+################ACS ECON + SHOOTINGS DATA
 #now getting rules for just social+shootings combined and economic+shootings combined
 Econ_filter[,] <- lapply(Econ_filter, as.factor)
 
@@ -223,39 +211,36 @@ Econ_filter[,] <- lapply(Econ_filter, as.factor)
 Econ_trans <- as(Econ_filter %>% select(
   -id, -name, -date, -age, -city, -state), 'transactions')
 
-test_Econ <- apriori(Econ_trans, parameter = list(support = 0.02, confidence = 0.3, minlen =2, maxlen =90, maxtime=90, target = 'rules'))
+test_Econ <- apriori(Econ_trans, parameter = list(support = 0.02, confidence = 0.3, 
+                                                  minlen =2, maxlen =90, maxtime=90, target = 'rules'))
 
 #restricting the right hand side to outliers = TRUE
-test_econ_true <- subset(test_Econ, subset = rhs %pin% 'outliers=TRUE')
+test_econ_true <- subset(test_Econ, subset = rhs %in% 'outliers=TRUE')
 summary(test_econ_true)
 inspect(head(sort(test_econ_true, by = 'lift'), 5))
 
 #restricting the right hand side to outliers= FALSE
-test_econ_false <- subset(test_Econ, subset = rhs %pin% 'outliers=FALSE')
+test_econ_false <- subset(test_Econ, subset = rhs %in% 'outliers=FALSE')
 summary(test_econ_false)
 inspect(head(sort(test_econ_false, by = 'lift'), 5))
 
-
-#go back and get more factors for economic
-
-
-###################################Social + Shootings#################################################
-
+###################################ACS SOCIAL + SHOOTINGS DATA
 #now getting rules for just social+shootings combined and economic+shootings combined
 Social_filter[,] <- lapply(Social_filter, as.factor)
 
 # Create the transactions
 Social_trans <- as(Social_filter %>% select(
   -id, -name, -date, -age, -city, -state), 'transactions')
-
-test_Social <- apriori(Social_trans, parameter = list(support = 0.04, confidence = 0.5, minlen =2, maxlen =90, maxtime=90, target = 'rules'))
+#0.04 and 0.5
+test_Social <- apriori(Social_trans, parameter = list(support = 0.01, confidence = 0.25, 
+                                                      minlen =2, maxlen =90, maxtime=90, target = 'rules'))
 
 #restricting the right hand side to outliers = TRUE
-test_social_true <- subset(test_Social, subset = rhs %pin% 'outliers=TRUE')
+test_social_true <- subset(test_Social, subset = rhs %in% 'outliers=TRUE')
 summary(test_social_true)
 inspect(head(sort(test_social_true, by = 'lift'), 5))
 
 #restricting the right hand side to outliers= FALSE
-test_social_false <- subset(test_Social, subset = rhs %pin% 'outliers=FALSE')
+test_social_false <- subset(test_Social, subset = rhs %in% 'outliers=FALSE')
 summary(test_social_false)
 inspect(head(sort(test_social_false, by = 'lift'), 5))
