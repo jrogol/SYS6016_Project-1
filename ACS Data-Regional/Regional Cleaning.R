@@ -195,18 +195,88 @@ shooting_trans <- as(shootings_filter %>% select(
   -id, -name, -date, -state_name, -age, -city, -state, -region), 'transactions')
 
 
-# Create Some rules on the shooting data, looking for Outliers in the RHS.
-
-# Support is for the entire rule
-shoot.rules <- apriori(shooting_trans, parameter = list(supp = .1, conf = .1,
+#### Rules for WaPo Data ONLY ####
+# Support of LHS is .5
+shoot.rules <- apriori(shooting_trans, parameter = list(supp = .5, conf = .01,
                                          minlen =2,maxlen=90, target = 'rules',
                                          originalSupport = F, ext = T))
 
+# Rules where Outliers are in the RHS
 test_sub <- subset(shoot.rules, subset = rhs %in% 'outliers=TRUE')
 inspect(head(sort(test_sub, by = 'lift')))
-inspect(test_sub)
 
+# Rules featuring the LHS of the above with 'outliers=FALSE' in the RHS
+test_sub2 <- subset(shoot.rules, subset = lhs %ain% c('gender=M',                                                                                   
+                                                      'threat_level=attack') &
+                      rhs %in% 'outliers=FALSE')
+inspect(sort(test_sub2, by = 'lift'))
 
+# Support of LHS is .4
+shoot.rules <- apriori(shooting_trans, parameter = list(supp = .4, conf = .01,
+                                                        minlen =2,maxlen=90, target = 'rules',
+                                                        originalSupport = F, ext = T))
+
+# Rules where Outliers are in the RHS
+test_sub <- subset(shoot.rules, subset = rhs %in% 'outliers=TRUE')
+inspect(head(sort(test_sub, by = 'lift')))
+
+# Rules featuring the LHS of the above with 'outliers=FALSE' in the RHS
+test_sub2 <- subset(shoot.rules, subset = lhs %ain% c('gender=M',                                                                                   
+                                                      'threat_level=attack',                                                                                     
+                                                      'signs_of_mental_illness=False') &
+                      rhs %in% 'outliers=FALSE')
+inspect(sort(test_sub2, by = 'lift'))
+
+# Support of LHS is .3
+shoot.rules <- apriori(shooting_trans, parameter = list(supp = .3, conf = .01,
+                                                        minlen =2,maxlen=90, target = 'rules',
+                                                        originalSupport = F, ext = T))
+
+# Rules where Outliers are in the RHS
+test_sub <- subset(shoot.rules, subset = rhs %in% 'outliers=TRUE')
+inspect(head(sort(test_sub, by = 'lift')))
+
+# Rules featuring the LHS of the above with 'outliers=FALSE' in the RHS
+test_sub2 <- subset(shoot.rules, subset = lhs %ain% c('gender=M',                                                                                   
+                                                      'armed=armed',                                                                                     
+                                                      'signs_of_mental_illness=False',
+                                                      'year=2015') &
+                      rhs %in% 'outliers=FALSE')
+inspect(head(sort(test_sub2, by = 'lift')))
+
+# Support of LHS is .2
+shoot.rules <- apriori(shooting_trans, parameter = list(supp = .2, conf = .01,
+                                                        minlen =2,maxlen=90, target = 'rules',
+                                                        originalSupport = F, ext = T))
+
+# Rules where Outliers are in the RHS
+test_sub <- subset(shoot.rules, subset = rhs %in% 'outliers=TRUE')
+inspect(head(sort(test_sub, by = 'lift')))
+
+# Rules featuring the LHS of the above with 'outliers=FALSE' in the RHS
+test_sub2 <- subset(shoot.rules, subset = lhs %ain% c('gender=M',                                                         
+                                                      'age_bin=(34,44]') &
+                      rhs %in% 'outliers=FALSE')
+inspect(head(sort(test_sub2, by = 'lift')))
+
+# Support of LHS is .1
+shoot.rules <- apriori(shooting_trans, parameter = list(supp = .1, conf = .01,
+                                                        minlen =2,maxlen=90, target = 'rules',
+                                                        originalSupport = F, ext = T))
+
+# Rules where Outliers are in the RHS
+test_sub <- subset(shoot.rules, subset = rhs %in% 'outliers=TRUE')
+inspect(head(sort(test_sub, by = 'lift')))
+
+# Rules featuring the LHS of the above with 'outliers=FALSE' in the RHS
+test_sub2 <- subset(shoot.rules, subset = lhs %ain% c('gender=M',                                                                                   
+                                                      'race=H',                                                                                     
+                                                      'signs_of_mental_illness=False',
+                                                      'armed=armed') &
+                      rhs %in% 'outliers=FALSE')
+inspect(head(sort(test_sub2, by = 'lift')))
+
+#### Rules for ACS data ####
 # turn ACS data into factors
 ACS_combined[,] <- lapply(ACS_combined[,], as.factor)
 ACS_Demo_filtered[,] <- lapply(ACS_Demo_filtered[,], as.factor)
@@ -226,43 +296,99 @@ ACS_trans_D <- as(inner_join(ACS_Demo_filtered, shootings_filter)%>% select(
 
 
 #### Rules for the Housing Set ####
-test <- apriori(ACS_trans_H, parameter = list(#supp = .01, conf = .25,
-                                                 minlen =2,maxlen=90,
-                                                 target = 'rules'))
+test <- apriori(ACS_trans_H, parameter = list(supp = .3, conf = .01,
+                                              minlen =2,maxlen=90,
+                                              target = 'rules',
+                                              originalSupport = F, ext = T))
+# Top rules for Outliers, by lift
 test_sub <- subset(test, subset = rhs %in% 'outliers=TRUE')
 inspect(head(sort(test_sub, by = 'lift')))
 
+# Rules for non-Outliers, containing the LHS above
+test_sub2 <- subset(test, subset = lhs %ain% c(
+  'Percent; MORTGAGE STATUS - Owner-occupied units - Housing units with a mortgage=1') &
+    rhs %in% 'outliers=FALSE')
+
+inspect(head(sort(test_sub2, by = 'lift')))
+
+
+
+test <- apriori(ACS_trans_H, parameter = list(supp = .2, conf = .01,
+                                                 minlen =2,maxlen=90,
+                                                 target = 'rules',
+                                                 originalSupport = F, ext = T))
+# Top rules for Outliers, by lift
+test_sub <- subset(test, subset = rhs %in% 'outliers=TRUE')
+inspect(head(sort(test_sub, by = 'lift')))
+
+# Rules for non-Outliers, containing the LHS above
+test_sub2 <- subset(test, subset = lhs %ain% c(
+  'Percent; SELECTED CHARACTERISTICS - Occupied housing units - No telephone service available=4',                                                                   
+     'gender=M') &
+    rhs %in% 'outliers=FALSE')
+
+inspect(head(sort(test_sub2, by = 'lift')))
+
+
 test <- apriori(ACS_trans_H, parameter = list(#supp = .01, conf = .25,
   minlen =2,maxlen=90,
-  target = 'rules'))
+  target = 'rules',
+  originalSupport = F, ext = T))
 test_sub <- subset(test, subset = rhs %in% 'outliers=FALSE')
 inspect(head(sort(test_sub, by = 'lift')))
 
 
 #### Rules for the Demographic Set ####
-test <- apriori(ACS_trans_D, parameter = list(#supp = .01, conf = .25,
+test <- apriori(ACS_trans_D, parameter = list(supp = .2, conf = .01,
   minlen =2,maxlen=90,
-  target = 'rules'))
+  target = 'rules',
+  originalSupport = F, ext = T))
 test_sub <- subset(test, subset = rhs %in% 'outliers=TRUE')
 inspect(head(sort(test_sub, by = 'lift')))
 
+test_sub2 <- subset(test, subset = lhs %ain% c(
+  'Percent; SEX AND AGE - Under 5 years=4',                                                                                                                              
+  'Percent; SEX AND AGE - 5 to 9 years=4') &
+    rhs %in% 'outliers=FALSE')
+
+inspect(head(sort(test_sub2, by = 'lift')))
+
 test <- apriori(ACS_trans_D, parameter = list(#supp = .01, conf = .25,
   minlen =2,maxlen=90,
-  target = 'rules'))
+  target = 'rules',
+  originalSupport = F, ext = T))
 test_sub <- subset(test, subset = rhs %in% 'outliers=FALSE')
 inspect(head(sort(test_sub, by = 'lift')))
 
 #### Rules for the Combined Set ####
-test <- apriori(ACS_trans_All, parameter = list(#supp = .01, conf = .25,
+# MinSup 30%
+test <- apriori(ACS_trans_All, parameter = list(supp = .3, conf = .01,
   minlen =2,maxlen=90,
-  target = 'rules'))
+  target = 'rules',
+  originalSupport = F, ext = T))
 test_sub <- subset(test, subset = rhs %in% 'outliers=TRUE')
 
 inspect(head(sort(test_sub, by = 'lift')))
 
-test <- apriori(ACS_trans_All, parameter = list(#supp = .01, conf = .25,
-  minlen =2,maxlen=90,
-  target = 'rules'))
-test_sub <- subset(test, subset = rhs %in% 'outliers=FALSE')
+test_sub2 <- subset(test, subset = lhs %ain% c(
+  'Percent; RACE - Race alone or in combination with one or more other races - Total population - White=2',                                                              
+                                               'gender=M') &
+    rhs %in% 'outliers=FALSE')
+
+inspect(head(sort(test_sub2, by = 'lift')))
+
+# MinSup of 20%
+test <- apriori(ACS_trans_All, parameter = list(supp = .2, conf = .01,
+                                                minlen =2,maxlen=90,
+                                                target = 'rules',
+                                                originalSupport = F, ext = T))
+test_sub <- subset(test, subset = rhs %in% 'outliers=TRUE')
 
 inspect(head(sort(test_sub, by = 'lift')))
+
+test_sub2 <- subset(test, subset = lhs %ain% c(
+  'Percent; RACE - Race alone or in combination with one or more other races - Total population - White=2',                                                              
+  'gender=M') &
+    rhs %in% 'outliers=FALSE')
+
+inspect(head(sort(test_sub2, by = 'lift')))
