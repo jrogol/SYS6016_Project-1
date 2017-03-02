@@ -9,6 +9,7 @@ library(arules)
 # Read in the WaPo fatal shootings data
 # From: https://github.com/washingtonpost/data-police-shootings
 shootings <- read_csv('https://github.com/washingtonpost/data-police-shootings/raw/master/fatal-police-shootings-data.csv')
+# last accessed 3/1/17 at 6:39 PM EST
 
 # Turn character Columns to factors (where appropriate)
 factors <- c(4,5,7:14)
@@ -24,6 +25,12 @@ shootings <- shootings %>%
 shootings <- shootings %>%
   mutate(age_bin = cut(shootings$age,c(0,17,24,34,44,54,64,200),
                        include.lowest = F, right = T, ordered_result = T))
+
+# Bin armed into: armed, not armed and undetermined
+armed_levels <- as.list(levels(shootings$armed))
+armed_levels[[61]] <- NULL #removing unarmed
+armed_levels[[61]] <- NULL #removing undetermined
+levels(shootings$armed)[levels(shootings$armed)%in%c(armed_levels)] <- "armed" #collapsed the factors into either armed or unarmed
 
 #### Read in the American Communities Survey Data from 2015 ####
 
@@ -93,10 +100,18 @@ quants <- function(df, keep){
 
 
 
-# Join Housing and Demographic features, by region. Simultaneously change
-# 'Geography' to 'region' for merging with primary data set later.
+# Create filtered data sets for both ACS files, and combine them.
+# Join Housing and Demographic features, by state. Simultaneously change
+# 'Geography' to 'state_name' for merging with primary data set later.
 
-ACS_combined2 <- inner_join(quants(ACS_Housing,Housing_keeps),
+ACS_Housing_filtered <- quants(ACS_Housing,Housing_keeps) %>%
+  rename(state_name = Geography)
+
+ACS_Demo_filtered <- quants(ACS_Demo,Demo_keeps) %>%
+  rename(state_name = Geography)
+
+
+ACS_combined <- inner_join(quants(ACS_Housing,Housing_keeps),
                            quants(ACS_Demo,Demo_keeps),
                            by = 'Geography') %>%
                 rename(state_name = Geography)
@@ -123,7 +138,6 @@ shootings <- inner_join(shootings, states,
 # Filter for 2015 and 2016 only
 shootings_filter <- shootings %>% filter(year <= 2016)
 
-
 # Look at the number of deaths, aggregated by state
 state_count <- shootings_filter %>%
   group_by(state) %>% 
@@ -135,9 +149,37 @@ state_count <- shootings_filter %>%
 state_count %>% 
   filter(n >= mean(n)+2*sd(n))
 
-# Create a new variable separating CA and TX from other states!
+# California and Texas are also two of the most populous sttes in the union. Thus, 
+# the counts should be normalized. In this case, the fourth column of ACS_Demo
+# (Estimate; SEX AND AGE - Total population) contains estimates for state
+# population. The per-state count will be divided by this number and multiplied
+# by 1 million in order to see the number of shootings per million occupants in
+# the state.
+
+# Create the state populations, joined with the state abbriviations in
+# preparation for an additional join
+state_pop <- inner_join(states, 
+                        ACS_Demo[,c('Estimate; SEX AND AGE - Total population','Geography')],
+                        by = c("state_name" = 'Geography')) %>%
+  rename(pop =`Estimate; SEX AND AGE - Total population`, state = abb) %>%
+  select(pop, state)
+
+# Join the state populations and create a new feature "shootings per milion
+# residents"
+state_count <- inner_join(state_count, state_pop) %>% 
+  mutate(adjCount = n*1000000/pop) %>% 
+  arrange(desc(adjCount))
+
+# Look for states whose cumulative total is more than 2 standard deviations
+# above the new feature's mean
+state_count %>% 
+  filter(adjCount >= mean(adjCount)+2*sd(adjCount))
+
+# This yeilds three states: New Mexico, Alaska and Oklahoma
+
+# Create a new variable separating NM, AK and OK  from other states!
 two_sd <- (state_count %>% 
-  filter(n >= mean(n)+2*sd(n)))$state
+             filter(adjCount >= mean(adjCount)+2*sd(adjCount)))$state
 
 shootings_filter <- shootings_filter %>% 
   mutate(outliers = state %in% two_sd)
@@ -148,46 +190,205 @@ shootings_filter <- shootings_filter %>%
 # Turn everything into factors
 shootings_filter[,] <- lapply(shootings_filter[,], as.factor)
 
-# Create the transactions
+# Create the transactions for the shootings data set only.
 shooting_trans <- as(shootings_filter %>% select(
   -id, -name, -date, -state_name, -age, -city, -state, -region), 'transactions')
 
 
-# Create Some rules!
-test <- apriori(shooting_trans, parameter = list(supp = .01, conf = .25,
-                                         minlen =2,maxlen=90, target = 'rules'))
+#### Rules for WaPo Data ONLY ####
+# Support of LHS is .5
+shoot.rules <- apriori(shooting_trans, parameter = list(supp = .5, conf = .01,
+                                         minlen =2,maxlen=90, target = 'rules',
+                                         originalSupport = F, ext = T))
+
+# Rules where Outliers are in the RHS
+test_sub <- subset(shoot.rules, subset = rhs %in% 'outliers=TRUE')
+inspect(head(sort(test_sub, by = 'lift')))
+
+# Rules featuring the LHS of the above with 'outliers=FALSE' in the RHS
+test_sub2 <- subset(shoot.rules, subset = lhs %ain% c('gender=M',                                                                                   
+                                                      'threat_level=attack') &
+                      rhs %in% 'outliers=FALSE')
+inspect(sort(test_sub2, by = 'lift'))
+
+# Support of LHS is .4
+shoot.rules <- apriori(shooting_trans, parameter = list(supp = .4, conf = .01,
+                                                        minlen =2,maxlen=90, target = 'rules',
+                                                        originalSupport = F, ext = T))
+
+# Rules where Outliers are in the RHS
+test_sub <- subset(shoot.rules, subset = rhs %in% 'outliers=TRUE')
+inspect(head(sort(test_sub, by = 'lift')))
+
+# Rules featuring the LHS of the above with 'outliers=FALSE' in the RHS
+test_sub2 <- subset(shoot.rules, subset = lhs %ain% c('gender=M',                                                                                   
+                                                      'threat_level=attack',                                                                                     
+                                                      'signs_of_mental_illness=False') &
+                      rhs %in% 'outliers=FALSE')
+inspect(sort(test_sub2, by = 'lift'))
+
+# Support of LHS is .3
+shoot.rules <- apriori(shooting_trans, parameter = list(supp = .3, conf = .01,
+                                                        minlen =2,maxlen=90, target = 'rules',
+                                                        originalSupport = F, ext = T))
+
+# Rules where Outliers are in the RHS
+test_sub <- subset(shoot.rules, subset = rhs %in% 'outliers=TRUE')
+inspect(head(sort(test_sub, by = 'lift')))
+
+# Rules featuring the LHS of the above with 'outliers=FALSE' in the RHS
+test_sub2 <- subset(shoot.rules, subset = lhs %ain% c('gender=M',                                                                                   
+                                                      'armed=armed',                                                                                     
+                                                      'signs_of_mental_illness=False',
+                                                      'year=2015') &
+                      rhs %in% 'outliers=FALSE')
+inspect(head(sort(test_sub2, by = 'lift')))
+
+# Support of LHS is .2
+shoot.rules <- apriori(shooting_trans, parameter = list(supp = .2, conf = .01,
+                                                        minlen =2,maxlen=90, target = 'rules',
+                                                        originalSupport = F, ext = T))
+
+# Rules where Outliers are in the RHS
+test_sub <- subset(shoot.rules, subset = rhs %in% 'outliers=TRUE')
+inspect(head(sort(test_sub, by = 'lift')))
+
+# Rules featuring the LHS of the above with 'outliers=FALSE' in the RHS
+test_sub2 <- subset(shoot.rules, subset = lhs %ain% c('gender=M',                                                         
+                                                      'age_bin=(34,44]') &
+                      rhs %in% 'outliers=FALSE')
+inspect(head(sort(test_sub2, by = 'lift')))
+
+# Support of LHS is .1
+shoot.rules <- apriori(shooting_trans, parameter = list(supp = .1, conf = .01,
+                                                        minlen =2,maxlen=90, target = 'rules',
+                                                        originalSupport = F, ext = T))
+
+# Rules where Outliers are in the RHS
+test_sub <- subset(shoot.rules, subset = rhs %in% 'outliers=TRUE')
+inspect(head(sort(test_sub, by = 'lift')))
+
+# Rules featuring the LHS of the above with 'outliers=FALSE' in the RHS
+test_sub2 <- subset(shoot.rules, subset = lhs %ain% c('gender=M',                                                                                   
+                                                      'race=H',                                                                                     
+                                                      'signs_of_mental_illness=False',
+                                                      'armed=armed') &
+                      rhs %in% 'outliers=FALSE')
+inspect(head(sort(test_sub2, by = 'lift')))
+
+#### Rules for ACS data ####
+# turn ACS data into factors
+ACS_combined[,] <- lapply(ACS_combined[,], as.factor)
+ACS_Demo_filtered[,] <- lapply(ACS_Demo_filtered[,], as.factor)
+ACS_Housing_filtered[,] <- lapply(ACS_Housing_filtered[,], as.factor)
 
 
-test_sub <- subset(test, subset = rhs %pin% 'outliers' & lhs %pin% 'age')
-
-inspect(head(sort(test_sub, by = 'confidence')))
-inspect(test_sub)
-
-
-
-ACS_combined2[,] <- lapply(ACS_combined2[,], as.factor)
-
-ACS_trans <- as(inner_join(ACS_combined2, shootings_filter )%>% select(
+# Create transaction sets for the combined, housing, and demographic sets
+ACS_trans_All <- as(inner_join(ACS_combined, shootings_filter)%>% select(
   -id, -name, -date, -state_name, -age, -city, -state, -region), 'transactions')
 
-test <- apriori(ACS_trans, parameter = list(#supp = .01, conf = .25,
-                                                 minlen =2,maxlen=90, maxtime = 90,
-                                                 target = 'rules'))
-test_sub <- subset(test, subset = rhs %pin% 'outliers')
+ACS_trans_H <- as(inner_join(ACS_Housing_filtered, shootings_filter)%>% select(
+  -id, -name, -date, -state_name, -age, -city, -state, -region), 'transactions')
+
+ACS_trans_D <- as(inner_join(ACS_Demo_filtered, shootings_filter)%>% select(
+  -id, -name, -date, -state_name, -age, -city, -state, -region), 'transactions')
+
+
+
+#### Rules for the Housing Set ####
+test <- apriori(ACS_trans_H, parameter = list(supp = .3, conf = .01,
+                                              minlen =2,maxlen=90,
+                                              target = 'rules',
+                                              originalSupport = F, ext = T))
+# Top rules for Outliers, by lift
+test_sub <- subset(test, subset = rhs %in% 'outliers=TRUE')
+inspect(head(sort(test_sub, by = 'lift')))
+
+# Rules for non-Outliers, containing the LHS above
+test_sub2 <- subset(test, subset = lhs %ain% c(
+  'Percent; MORTGAGE STATUS - Owner-occupied units - Housing units with a mortgage=1') &
+    rhs %in% 'outliers=FALSE')
+
+inspect(head(sort(test_sub2, by = 'lift')))
+
+
+
+test <- apriori(ACS_trans_H, parameter = list(supp = .2, conf = .01,
+                                                 minlen =2,maxlen=90,
+                                                 target = 'rules',
+                                                 originalSupport = F, ext = T))
+# Top rules for Outliers, by lift
+test_sub <- subset(test, subset = rhs %in% 'outliers=TRUE')
+inspect(head(sort(test_sub, by = 'lift')))
+
+# Rules for non-Outliers, containing the LHS above
+test_sub2 <- subset(test, subset = lhs %ain% c(
+  'Percent; SELECTED CHARACTERISTICS - Occupied housing units - No telephone service available=4',                                                                   
+     'gender=M') &
+    rhs %in% 'outliers=FALSE')
+
+inspect(head(sort(test_sub2, by = 'lift')))
+
+
+test <- apriori(ACS_trans_H, parameter = list(#supp = .01, conf = .25,
+  minlen =2,maxlen=90,
+  target = 'rules',
+  originalSupport = F, ext = T))
+test_sub <- subset(test, subset = rhs %in% 'outliers=FALSE')
+inspect(head(sort(test_sub, by = 'lift')))
+
+
+#### Rules for the Demographic Set ####
+test <- apriori(ACS_trans_D, parameter = list(supp = .2, conf = .01,
+  minlen =2,maxlen=90,
+  target = 'rules',
+  originalSupport = F, ext = T))
+test_sub <- subset(test, subset = rhs %in% 'outliers=TRUE')
+inspect(head(sort(test_sub, by = 'lift')))
+
+test_sub2 <- subset(test, subset = lhs %ain% c(
+  'Percent; SEX AND AGE - Under 5 years=4',                                                                                                                              
+  'Percent; SEX AND AGE - 5 to 9 years=4') &
+    rhs %in% 'outliers=FALSE')
+
+inspect(head(sort(test_sub2, by = 'lift')))
+
+test <- apriori(ACS_trans_D, parameter = list(#supp = .01, conf = .25,
+  minlen =2,maxlen=90,
+  target = 'rules',
+  originalSupport = F, ext = T))
+test_sub <- subset(test, subset = rhs %in% 'outliers=FALSE')
+inspect(head(sort(test_sub, by = 'lift')))
+
+#### Rules for the Combined Set ####
+# MinSup 30%
+test <- apriori(ACS_trans_All, parameter = list(supp = .3, conf = .01,
+  minlen =2,maxlen=90,
+  target = 'rules',
+  originalSupport = F, ext = T))
+test_sub <- subset(test, subset = rhs %in% 'outliers=TRUE')
 
 inspect(head(sort(test_sub, by = 'lift')))
-inspect(test_sub)
 
+test_sub2 <- subset(test, subset = lhs %ain% c(
+  'Percent; RACE - Race alone or in combination with one or more other races - Total population - White=2',                                                              
+                                               'gender=M') &
+    rhs %in% 'outliers=FALSE')
 
+inspect(head(sort(test_sub2, by = 'lift')))
 
+# MinSup of 20%
+test <- apriori(ACS_trans_All, parameter = list(supp = .2, conf = .01,
+                                                minlen =2,maxlen=90,
+                                                target = 'rules',
+                                                originalSupport = F, ext = T))
+test_sub <- subset(test, subset = rhs %in% 'outliers=TRUE')
 
+inspect(head(sort(test_sub, by = 'lift')))
 
-#### Use Decision Tree to Predict XXXX ####
+test_sub2 <- subset(test, subset = lhs %ain% c(
+  'Percent; RACE - Race alone or in combination with one or more other races - Total population - White=2',                                                              
+  'gender=M') &
+    rhs %in% 'outliers=FALSE')
 
-library(C50)
-shooting_tree <- C5.0.formula(c(race, gender)~, shootings_joined,
-                              subset = which(shootings_joined$year == 2015),
-                              rules = T)
-
-shooting_tree
-summary(shooting_tree)
+inspect(head(sort(test_sub2, by = 'lift')))
