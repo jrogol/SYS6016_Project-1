@@ -195,41 +195,74 @@ shooting_trans <- as(shootings_filter %>% select(
   -id, -name, -date, -state_name, -age, -city, -state, -region), 'transactions')
 
 
-# Create Some rules!
-test <- apriori(shooting_trans, parameter = list(supp = .01, conf = .25,
-                                         minlen =2,maxlen=90, target = 'rules'))
+# Create Some rules on the shooting data, looking for Outliers in the RHS.
 
+# Support is for the entire rule
+shoot.rules <- apriori(shooting_trans, parameter = list(supp = .1, conf = .1,
+                                         minlen =2,maxlen=90, target = 'rules',
+                                         originalSupport = F, ext = T))
 
-test_sub <- subset(test, subset = rhs %pin% 'outliers' & lhs %pin% 'body_')
-
+test_sub <- subset(shoot.rules, subset = rhs %in% 'outliers=TRUE')
 inspect(head(sort(test_sub, by = 'lift')))
 inspect(test_sub)
 
 
+# turn ACS data into factors
+ACS_combined[,] <- lapply(ACS_combined[,], as.factor)
+ACS_Demo_filtered[,] <- lapply(ACS_Demo_filtered[,], as.factor)
+ACS_Housing_filtered[,] <- lapply(ACS_Housing_filtered[,], as.factor)
 
-ACS_combined2[,] <- lapply(ACS_combined2[,], as.factor)
 
-ACS_trans <- as(inner_join(ACS_combined2, shootings_filter )%>% select(
+# Create transaction sets for the combined, housing, and demographic sets
+ACS_trans_All <- as(inner_join(ACS_combined, shootings_filter)%>% select(
   -id, -name, -date, -state_name, -age, -city, -state, -region), 'transactions')
 
-test <- apriori(ACS_trans, parameter = list(#supp = .01, conf = .25,
-                                                 minlen =2,maxlen=90, maxtime = 90,
+ACS_trans_H <- as(inner_join(ACS_Housing_filtered, shootings_filter)%>% select(
+  -id, -name, -date, -state_name, -age, -city, -state, -region), 'transactions')
+
+ACS_trans_D <- as(inner_join(ACS_Demo_filtered, shootings_filter)%>% select(
+  -id, -name, -date, -state_name, -age, -city, -state, -region), 'transactions')
+
+
+
+#### Rules for the Housing Set ####
+test <- apriori(ACS_trans_H, parameter = list(#supp = .01, conf = .25,
+                                                 minlen =2,maxlen=90,
                                                  target = 'rules'))
-test_sub <- subset(test, subset = rhs %pin% 'outliers')
+test_sub <- subset(test, subset = rhs %in% 'outliers=TRUE')
+inspect(head(sort(test_sub, by = 'lift')))
+
+test <- apriori(ACS_trans_H, parameter = list(#supp = .01, conf = .25,
+  minlen =2,maxlen=90,
+  target = 'rules'))
+test_sub <- subset(test, subset = rhs %in% 'outliers=FALSE')
+inspect(head(sort(test_sub, by = 'lift')))
+
+
+#### Rules for the Demographic Set ####
+test <- apriori(ACS_trans_D, parameter = list(#supp = .01, conf = .25,
+  minlen =2,maxlen=90,
+  target = 'rules'))
+test_sub <- subset(test, subset = rhs %in% 'outliers=TRUE')
+inspect(head(sort(test_sub, by = 'lift')))
+
+test <- apriori(ACS_trans_D, parameter = list(#supp = .01, conf = .25,
+  minlen =2,maxlen=90,
+  target = 'rules'))
+test_sub <- subset(test, subset = rhs %in% 'outliers=FALSE')
+inspect(head(sort(test_sub, by = 'lift')))
+
+#### Rules for the Combined Set ####
+test <- apriori(ACS_trans_All, parameter = list(#supp = .01, conf = .25,
+  minlen =2,maxlen=90,
+  target = 'rules'))
+test_sub <- subset(test, subset = rhs %in% 'outliers=TRUE')
 
 inspect(head(sort(test_sub, by = 'lift')))
-inspect(test_sub)
 
+test <- apriori(ACS_trans_All, parameter = list(#supp = .01, conf = .25,
+  minlen =2,maxlen=90,
+  target = 'rules'))
+test_sub <- subset(test, subset = rhs %in% 'outliers=FALSE')
 
-
-
-
-#### Use Decision Tree to Predict XXXX ####
-
-library(C50)
-shooting_tree <- C5.0.formula(c(race, gender)~, shootings_joined,
-                              subset = which(shootings_joined$year == 2015),
-                              rules = T)
-
-shooting_tree
-summary(shooting_tree)
+inspect(head(sort(test_sub, by = 'lift')))
