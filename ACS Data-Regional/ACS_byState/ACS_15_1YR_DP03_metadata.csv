@@ -384,7 +384,7 @@ HC03_VC130,Percent; HEALTH INSURANCE COVERAGE - Civilian noninstitutionalized po
 HC04_VC130,Percent Margin of Error; HEALTH INSURANCE COVERAGE - Civilian noninstitutionalized population,
 HC01_VC131,Estimate; HEALTH INSURANCE COVERAGE - Civilian noninstitutionalized population - With health insurance coverage,
 HC02_VC131,Margin of Error; HEALTH INSURANCE COVERAGE - Civilian noninstitutionalized population - With health insurance coverage,
-HC03_VC131,Percent; HEALTH INSURANCE COVERAGE - Civilian noninstitutionalized population - With health insurance coverage,
+HC03_VC131,Percent; HEALTH INSURANCE COVERAGE - Civilian noninstitutionalized population - With health insurance coverage,x
 HC04_VC131,Percent Margin of Error; HEALTH INSURANCE COVERAGE - Civilian noninstitutionalized population - With health insurance coverage,
 HC01_VC132,Estimate; HEALTH INSURANCE COVERAGE - Civilian noninstitutionalized population - With health insurance coverage - With private health insurance,
 HC02_VC132,Margin of Error; HEALTH INSURANCE COVERAGE - Civilian noninstitutionalized population - With health insurance coverage - With private health insurance,
@@ -396,7 +396,7 @@ HC03_VC133,Percent; HEALTH INSURANCE COVERAGE - Civilian noninstitutionalized po
 HC04_VC133,Percent Margin of Error; HEALTH INSURANCE COVERAGE - Civilian noninstitutionalized population - With health insurance coverage - With public coverage,
 HC01_VC134,Estimate; HEALTH INSURANCE COVERAGE - Civilian noninstitutionalized population - No health insurance coverage,
 HC02_VC134,Margin of Error; HEALTH INSURANCE COVERAGE - Civilian noninstitutionalized population - No health insurance coverage,
-HC03_VC134,Percent; HEALTH INSURANCE COVERAGE - Civilian noninstitutionalized population - No health insurance coverage,
+HC03_VC134,Percent; HEALTH INSURANCE COVERAGE - Civilian noninstitutionalized population - No health insurance coverage,x
 HC04_VC134,Percent Margin of Error; HEALTH INSURANCE COVERAGE - Civilian noninstitutionalized population - No health insurance coverage,
 HC01_VC137,Estimate; HEALTH INSURANCE COVERAGE - Civilian noninstitutionalized population under 18 years,
 HC02_VC137,Margin of Error; HEALTH INSURANCE COVERAGE - Civilian noninstitutionalized population under 18 years,
@@ -550,4 +550,3 @@ HC01_VC180,Estimate; PERCENTAGE OF FAMILIES AND PEOPLE WHOSE INCOME IN THE PAST 
 HC02_VC180,Margin of Error; PERCENTAGE OF FAMILIES AND PEOPLE WHOSE INCOME IN THE PAST 12 MONTHS IS BELOW THE POVERTY LEVEL - 65 years and over - Unrelated individuals 15 years and over,
 HC03_VC180,Percent; PERCENTAGE OF FAMILIES AND PEOPLE WHOSE INCOME IN THE PAST 12 MONTHS IS BELOW THE POVERTY LEVEL - 65 years and over - Unrelated individuals 15 years and over,
 HC04_VC180,Percent Margin of Error; PERCENTAGE OF FAMILIES AND PEOPLE WHOSE INCOME IN THE PAST 12 MONTHS IS BELOW THE POVERTY LEVEL - 65 years and over - Unrelated individuals 15 years and over,
-,
