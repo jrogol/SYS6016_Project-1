@@ -231,8 +231,8 @@ Social_filter[,] <- lapply(Social_filter, as.factor)
 # Create the transactions
 Social_trans <- as(Social_filter %>% select(
   -id, -name, -date, -age, -city, -state), 'transactions')
-#0.04 and 0.5
-test_Social <- apriori(Social_trans, parameter = list(support = 0.01, confidence = 0.25, 
+
+test_Social <- apriori(Social_trans, parameter = list(support = 0.04, confidence = 0.5, 
                                                       minlen =2, maxlen =90, maxtime=90, target = 'rules'))
 
 #restricting the right hand side to outliers = TRUE
