@@ -342,7 +342,7 @@ HC01_VC126,Estimate; RESIDENCE 1 YEAR AGO - Population 1 year and over - Abroad,
 HC02_VC126,Margin of Error; RESIDENCE 1 YEAR AGO - Population 1 year and over - Abroad,
 HC03_VC126,Percent; RESIDENCE 1 YEAR AGO - Population 1 year and over - Abroad,
 HC04_VC126,Percent Margin of Error; RESIDENCE 1 YEAR AGO - Population 1 year and over - Abroad,
-HC01_VC130,Estimate; PLACE OF BIRTH - Total population,
+HC01_VC130,Estimate; PLACE OF BIRTH - Total population,x
 HC02_VC130,Margin of Error; PLACE OF BIRTH - Total population,
 HC03_VC130,Percent; PLACE OF BIRTH - Total population,
 HC04_VC130,Percent Margin of Error; PLACE OF BIRTH - Total population,
