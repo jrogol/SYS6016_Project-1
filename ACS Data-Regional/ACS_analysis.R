@@ -182,7 +182,78 @@ Econ_filter <- Econ_filter %>% mutate(outliers = state %in% state_2sd)
 
 #########################################ASSOCIATION RULES ANALYSIS#################################
 
-####################RULES FOR COMBINED DATA
+#### Rules for the ACS Social Set
+
+#conversion to all factors
+Social_filter[,] <- lapply(Social_filter, as.factor)
+
+# Create the transactions
+Social_trans <- as(Social_filter %>% select(
+  -id, -name, -date, -age, -city, -state), 'transactions')
+
+#limiting support to 0.2
+test <- apriori(Social_trans, parameter = list(supp = .2, conf = .01,
+                                              minlen =2,maxlen=90,
+                                              target = 'rules',
+                                              originalSupport = F, ext = T))
+# Top rules for Outliers, by lift
+test_sub <- subset(test, subset = rhs %in% 'outliers=TRUE')
+inspect(head(sort(test_sub, by = 'lift')))
+
+# Rules for non-Outliers, containing the LHS above
+test_sub2 <- subset(test, subset = lhs %ain% c(
+  'armed=armed', 'gender=M', 'Percent; VETERAN STATUS - Civilian population 18 years and over - Civilian veterans=4') &
+    rhs %in% 'outliers=FALSE')
+
+inspect(head(sort(test_sub2, by = 'lift')))
+
+#limiting support to 0.1
+test <- apriori(Social_trans, parameter = list(supp = .1, conf = .01,
+                                              minlen =2,maxlen=90,
+                                              target = 'rules',
+                                              originalSupport = F, ext = T))
+# Top rules for Outliers, by lift
+test_sub <- subset(test, subset = rhs %in% 'outliers=TRUE')
+inspect(head(sort(test_sub, by = 'lift')))
+
+# Rules for non-Outliers, containing the LHS above
+test_sub2 <- subset(test, subset = lhs %ain% c(
+'gender=M', 
+'Percent; VETERAN STATUS - Civilian population 18 years and over - Civilian veterans=4', 
+'Percent; DISABILITY STATUS OF THE CIVILIAN NONINSTITUTIONALIZED POPULATION - Total Civilian Noninstitutionalized Population - With a disability=4') &
+    rhs %in% 'outliers=FALSE')
+
+inspect(head(sort(test_sub2, by = 'lift')))
+
+######## Rules for the ACS Economic Set #############
+
+#conversion to all factors
+Econ_filter[,] <- lapply(Econ_filter, as.factor)
+
+# Create the transactions
+Econ_trans <- as(Econ_filter %>% select(
+  -id, -name, -date, -age, -city, -state), 'transactions')
+
+#limiting support to 0.1
+test <- apriori(Econ_trans, parameter = list(supp = 0.1, conf = .01,
+                                               minlen =2,maxlen=90,
+                                               target = 'rules',
+                                               originalSupport = F, ext = T))
+
+# Top rules for Outliers, by lift
+test_sub <- subset(test, subset = rhs %in% 'outliers=TRUE')
+inspect(head(sort(test_sub, by = 'lift')))
+
+# Rules for non-Outliers, containing the LHS above
+test_sub2 <- subset(test, subset = lhs %ain% c(
+  'gender=M', 
+  'Percent; HEALTH INSURANCE COVERAGE - Civilian noninstitutionalized population - No health insurance coverage=4', 
+  'Percent; PERCENTAGE OF FAMILIES AND PEOPLE WHOSE INCOME IN THE PAST 12 MONTHS IS BELOW THE POVERTY LEVEL - All families=3') &
+    rhs %in% 'outliers=FALSE')
+
+inspect(head(sort(test_sub2, by = 'lift')))
+
+####Rules for ACS Combined Set####
 #convert entire df into factors
 shootings_filter[,] <- lapply(shootings_filter, as.factor)
 
@@ -190,57 +261,18 @@ shootings_filter[,] <- lapply(shootings_filter, as.factor)
 shooting_trans <- as(shootings_filter %>% select(
   -id, -name, -date, -age, -city, -state), 'transactions')
 
-test <- apriori(shooting_trans, parameter = list(support = 0.05, confidence = 0.3, 
-                                                 minlen =2, maxlen =90, maxtime=90, target = 'rules'))
-
-#restricting the right hand side to outliers = TRUE
+# limiting support to 0.1
+test <- apriori(shooting_trans, parameter = list(supp = .1, conf = .01,
+                                                minlen =2,maxlen=90,
+                                                target = 'rules',
+                                                originalSupport = F, ext = T))
 test_sub <- subset(test, subset = rhs %in% 'outliers=TRUE')
-summary(test_sub)
-inspect(head(sort(test_sub, by = 'lift'), 5))
 
-#restricting the right hand side to outliers= FALSE
-test_sub_false <- subset(test, subset = rhs %in% 'outliers=FALSE')
-summary(test_sub_false)
-inspect(head(sort(test_sub_false, by = 'lift'), 5))
+inspect(head(sort(test_sub, by = 'lift')))
 
-################ACS ECON + SHOOTINGS DATA
-#now getting rules for just social+shootings combined and economic+shootings combined
-Econ_filter[,] <- lapply(Econ_filter, as.factor)
+test_sub2 <- subset(test, subset = lhs %ain% c('gender=M',
+                                               'Percent; VETERAN STATUS - Civilian population 18 years and over - Civilian veterans=4',
+                                               'Percent; DISABILITY STATUS OF THE CIVILIAN NONINSTITUTIONALIZED POPULATION - Total Civilian Noninstitutionalized Population - With a disability=4') &
+                                                rhs %in% 'outliers=FALSE')
 
-# Create the transactions
-Econ_trans <- as(Econ_filter %>% select(
-  -id, -name, -date, -age, -city, -state), 'transactions')
-
-test_Econ <- apriori(Econ_trans, parameter = list(support = 0.02, confidence = 0.3, 
-                                                  minlen =2, maxlen =90, maxtime=90, target = 'rules'))
-
-#restricting the right hand side to outliers = TRUE
-test_econ_true <- subset(test_Econ, subset = rhs %in% 'outliers=TRUE')
-summary(test_econ_true)
-inspect(head(sort(test_econ_true, by = 'lift'), 5))
-
-#restricting the right hand side to outliers= FALSE
-test_econ_false <- subset(test_Econ, subset = rhs %in% 'outliers=FALSE')
-summary(test_econ_false)
-inspect(head(sort(test_econ_false, by = 'lift'), 5))
-
-###################################ACS SOCIAL + SHOOTINGS DATA
-#now getting rules for just social+shootings combined and economic+shootings combined
-Social_filter[,] <- lapply(Social_filter, as.factor)
-
-# Create the transactions
-Social_trans <- as(Social_filter %>% select(
-  -id, -name, -date, -age, -city, -state), 'transactions')
-
-test_Social <- apriori(Social_trans, parameter = list(support = 0.04, confidence = 0.5, 
-                                                      minlen =2, maxlen =90, maxtime=90, target = 'rules'))
-
-#restricting the right hand side to outliers = TRUE
-test_social_true <- subset(test_Social, subset = rhs %in% 'outliers=TRUE')
-summary(test_social_true)
-inspect(head(sort(test_social_true, by = 'lift'), 5))
-
-#restricting the right hand side to outliers= FALSE
-test_social_false <- subset(test_Social, subset = rhs %in% 'outliers=FALSE')
-summary(test_social_false)
-inspect(head(sort(test_social_false, by = 'lift'), 5))
+inspect(head(sort(test_sub2, by = 'lift')))
