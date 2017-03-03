@@ -32,6 +32,9 @@ armed_levels[[61]] <- NULL #removing unarmed
 armed_levels[[61]] <- NULL #removing undetermined
 levels(shootings$armed)[levels(shootings$armed)%in%c(armed_levels)] <- "armed" #collapsed the factors into either armed or unarmed
 
+
+
+
 #### Read in the American Communities Survey Data from 2015 ####
 
 # ACS data obtained from:
@@ -175,9 +178,9 @@ state_count <- inner_join(state_count, state_pop) %>%
 state_count %>% 
   filter(adjCount >= mean(adjCount)+2*sd(adjCount))
 
-# This yeilds three states: New Mexico, Alaska and Oklahoma
+# This yields three states: New Mexico, Alaska and Oklahoma
 
-# Create a new variable separating NM, AK and OK  from other states!
+# Create a new variable separating NM, AK and OK  from other states
 two_sd <- (state_count %>% 
              filter(adjCount >= mean(adjCount)+2*sd(adjCount)))$state
 
@@ -276,7 +279,7 @@ test_sub2 <- subset(shoot.rules, subset = lhs %ain% c('gender=M',
                       rhs %in% 'outliers=FALSE')
 inspect(head(sort(test_sub2, by = 'lift')))
 
-#### Rules for ACS data ####
+#### Prepping ACS data for rules####
 # turn ACS data into factors
 ACS_combined[,] <- lapply(ACS_combined[,], as.factor)
 ACS_Demo_filtered[,] <- lapply(ACS_Demo_filtered[,], as.factor)
@@ -296,6 +299,8 @@ ACS_trans_D <- as(inner_join(ACS_Demo_filtered, shootings_filter)%>% select(
 
 
 #### Rules for the Housing Set ####
+
+# minimum support of the LHS is 30%
 test <- apriori(ACS_trans_H, parameter = list(supp = .3, conf = .01,
                                               minlen =2,maxlen=90,
                                               target = 'rules',
@@ -312,7 +317,7 @@ test_sub2 <- subset(test, subset = lhs %ain% c(
 inspect(head(sort(test_sub2, by = 'lift')))
 
 
-
+# Minimum support of the LHS is 20%
 test <- apriori(ACS_trans_H, parameter = list(supp = .2, conf = .01,
                                                  minlen =2,maxlen=90,
                                                  target = 'rules',
@@ -330,14 +335,6 @@ test_sub2 <- subset(test, subset = lhs %ain% c(
 inspect(head(sort(test_sub2, by = 'lift')))
 
 
-test <- apriori(ACS_trans_H, parameter = list(#supp = .01, conf = .25,
-  minlen =2,maxlen=90,
-  target = 'rules',
-  originalSupport = F, ext = T))
-test_sub <- subset(test, subset = rhs %in% 'outliers=FALSE')
-inspect(head(sort(test_sub, by = 'lift')))
-
-
 #### Rules for the Demographic Set ####
 test <- apriori(ACS_trans_D, parameter = list(supp = .2, conf = .01,
   minlen =2,maxlen=90,
@@ -352,13 +349,6 @@ test_sub2 <- subset(test, subset = lhs %ain% c(
     rhs %in% 'outliers=FALSE')
 
 inspect(head(sort(test_sub2, by = 'lift')))
-
-test <- apriori(ACS_trans_D, parameter = list(#supp = .01, conf = .25,
-  minlen =2,maxlen=90,
-  target = 'rules',
-  originalSupport = F, ext = T))
-test_sub <- subset(test, subset = rhs %in% 'outliers=FALSE')
-inspect(head(sort(test_sub, by = 'lift')))
 
 #### Rules for the Combined Set ####
 # MinSup 30%
